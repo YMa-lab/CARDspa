@@ -1,0 +1,43 @@
+# R environment files
+.Renviron
+.Rprofile
+
+# R project files
+.Rproj
+.Rproj.user
+.Rhistory
+.Rapp.history
+
+# Compiled source code
+*.o
+*.sl
+*.so
+*.dylib
+*.a
+*.dll
+*.def
+
+# System files
+.DS_Store
+inst/doc
+
+# LaTeX files
+*.log
+*.aux
+
+# Others
+unsrturl.bst
+.backups
+.cproject
+.directory
+.dropbox
+.exrc
+.gdb.history
+.gitattributes
+.gitmodules
+.hgtags
+.project
+.seed
+.settings
+.tm_properties
+
