@@ -1,0 +1,10 @@
+bibentry(
+  bibtype  = "Article",
+  title    = "Spatially informed cell-type deconvolution for spatial transcriptomics",
+  author   = personList(person("Ying", "Ma"), person("Xiang", "Zhou")),
+  journal  = "Nat Biotechnol",
+  year     = "2022",
+  volume   = "40",
+  pages    = "1349-1359",
+  doi      = "10.1038/s41587-022-01273-7"
+)

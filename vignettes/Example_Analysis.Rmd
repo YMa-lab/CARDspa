@@ -1,0 +1,478 @@
+---
+title: "Example_Analysis"
+author: "Ying Ma"
+date: "Jun 25, 2024"
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{Example_Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+We developed a statistical method for spatially informed cell type deconvolution 
+for spatial transcriptomics. Briefly,CARD is a reference-based deconvolution method 
+that estimates cell type composition in spatial transcriptomics based on cell type 
+specific expression information obtained from a reference scRNA-seq data. A key 
+feature of CARD is its ability to accommodate spatial correlation in the cell type 
+composition across tissue locations, enabling accurate and spatially informed cell 
+type deconvolution as well as refined spatial map construction. CARD relies on an 
+efficient optimization algorithm for constrained maximum likelihood estimation and 
+is scalable to spatial transcriptomics with tens of thousands of spatial locations 
+and tens of thousands of genes.
+
+## Installation
+```{r, eval=FALSE}
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install("CARDspa")
+```
+
+This tutorial is the example analysis with CARDspa on the human pancreatic ductal 
+adenocarcinomas data from Moncada et al, 2020. Please note that we are using 
+edited data, see the [tutorial](https://yma-lab.github.io/CARD/) for an example using the complete data.
+
+## Required input data
+`CARD` requires two types of input data:
+- spatial transcriptomics count data, along with spatial location information.  
+- single cell RNAseq (scRNA-seq) count data, along with meta information indicating 
+the cell type information and the sample (subject) information for each cell.  
+
+The example data for running the tutorial is included in the package.
+Here are the details about the required data input illustrated by the example datasets. 
+
+### 1. spatial transcriptomics data, e.g.,
+```{r}
+library(CARDspa)
+library(RcppML)
+library(NMF)
+library(RcppArmadillo)
+library(SingleCellExperiment)
+library(ggplot2)
+#### load the example spatial transcriptomics count data, 
+data(spatial_count)
+spatial_count[1:4,1:4]
+```
+The spatial transcriptomics count data must be in the format of matrix or sparseMatrix, 
+while each row represents a gene and each column represents a spatial location. 
+The column names of the spatial data can be in the "XcoordxYcoord" (i.e., 10x10) 
+format, but you can also maintain your original spot names, for example, barcode names. 
+
+```{r}
+#### load the example spatial location data, 
+data(spatial_location)
+spatial_location[1:4,]
+```
+The spatial location data must be in the format of data frame while each row 
+represents a spatial location, the first column represents the x coordinate and 
+the second column represents the y coordinate. The rownames of the spatial location 
+data frame should match exactly with the column names of the spatial_count.
+
+### 2. single cell RNAseq ((scRNA-seq)) data,  e.g.,
+```{r}
+data(sc_count)
+sc_count[1:4,1:4]
+```
+The scRNA-seq count data must be in the format of matrix or sparseMatrix, while 
+each row represents a gene and each column represents a cell.
+
+```{r}
+data(sc_meta)
+sc_meta[1:4,]
+```
+
+The scRNAseq meta data must be in the format of data frame while each row represents 
+a cell. The rownames of the scRNAseq meta data should match exactly with the column 
+names of the scRNAseq count data. The sc_meta data must contain the column indicating 
+the cell type assignment for each cell (e.g., "cellType" column in the example 
+sc_meta data). Sample/subject information should be provided, if there is only 
+one sample, we can add a column by ```sc_meta$sampleInfo = "sample1"```.
+
+We suggest the users to check their single cell RNASeq data carefully before 
+running CARD. We suggest the users to input the single cell RNAseq data with each 
+cell type containing at least 2 cells. i.e. 
+print(table(sc_meta$cellType,useNA = "ifany"))
+
+## Cell Type Deconvolution
+
+### 1. Create an `CARD` object
+The CARD object is created by the function `createCARDObject`. The essential inputs are:
+- sc_count: Matrix or sparse matrix of raw scRNA-seq count data, each row 
+represents a gene and each column represents a cell. This sc_count data serves 
+as a reference for the cell type deconvolution for spatial transcriptomics data. 
+- sc_meta: Data frame, with each row representing the cell type and/or sample 
+information of a specific cell. The row names of this data frame should match 
+exactly with the column names of the sc_count data. The sc_meta data must contain 
+the column indicating the cell type assignment for each cell (e.g., "cellType" 
+column in the example sc_meta data). 
+- spatial_count: Matrix or sparse matrix of raw spatial resolved transcriptomics 
+count data, each row represents a gene and each column represents a spatial location. 
+This is the spatial transcriptomics data that we are interested to deconvolute.
+- spatial_location: Data frame, with two columns representing the x and y coordinates 
+of the spatial location. The rownames of this data frame should match eaxctly 
+with the columns of the spatial_count.
+- ct.varname: Caracter, the name of the column in sc_meta that specifies the cell 
+type assignment. 
+- ct.select: Vector of cell type names that you are interested in to deconvolute, 
+default as NULL. If NULL, then use all cell types provided by single cell dataset.
+- sample.varname: Character,the name of the column in sc_meta that specifies the 
+sample/subject information. If NULL, we just use the whole data as one sample/subject.
+- minCountGene: Numeric, include spatial locations where at least this number of 
+counts detected. Default is 100. 
+- minCountSpot: Numeric, include genes where at least this number of spatial locations 
+that have non-zero expression. Default is 5.
+
+```{r}
+CARD_obj = createCARDObject(
+	sc_count = sc_count,
+	sc_meta = sc_meta,
+	spatial_count = spatial_count,
+	spatial_location = spatial_location,
+	ct.varname = "cellType",
+	ct.select = unique(sc_meta$cellType),
+	sample.varname = "sampleInfo",
+	minCountGene = 100,
+	minCountSpot = 5) 
+## QC on scRNASeq dataset! ...
+## QC on spatially-resolved dataset! ..
+```
+
+The spatial data are stored in `CARD_obj@spatial_countMat` and `CARD_obj@spatial_location` 
+while the scRNA-seq data is stored in CARD_obj@sc_eset in the format of SingleCellExperiment. 
+
+### 2. Deconvolution using CARD
+Now we have evrything stored in the CARD object, we can use CARD to deconvolute 
+the spatial transcriptomics data. CARD is computationally fast and memory efficient. 
+CARD relies on an efficient optimization algorithm for constrained maximum likelihood 
+estimation and is scalable to spatial transcriptomics with tens of thousands of 
+spatial locations and tens of thousands of genes. For the example dataset with 
+the sample size of 428 locations, it takes within a minute to finish the deconvolution. 
+
+```{r}
+CARD_obj = CARD_deconvolution(CARD_object = CARD_obj)
+## create reference matrix from scRNASeq...
+## Select Informative Genes! ...
+## Deconvolution Starts! ...
+## Deconvolution Finish! ...
+```
+
+The results are stored in `CARD_obj@Proportion_CARD`.
+
+```{r}
+print(CARD_obj@Proportion_CARD[1:2,])
+```
+
+### 3. Visualize the proportion for each cell type
+First, we jointly visualize the cell type proportion matrix through scatterpie plot.
+Note that here because the number of spots is relatively small, so jointly visualize 
+the cell type proportion matrix in the scatterpie plot format is duable. We do not 
+recommend users to visualize this plot when the number of spots is > 500. Instead, 
+we recommend users to visualize the proportion directly, i.e., using the function 
+CARD_visualize_prop(). Details of using this function see the next example.  
+
+```{r}
+## set the colors. Here, I just use the colors in the manuscript, if the color 
+## is not provided, the function will use default color in the package. 
+colors = c("#FFD92F","#4DAF4A","#FCCDE5","#D9D9D9","#377EB8","#7FC97F","#BEAED4",
+    "#FDC086","#FFFF99","#386CB0","#F0027F","#BF5B17","#666666","#1B9E77","#D95F02",
+    "#7570B3","#E7298A","#66A61E","#E6AB02","#A6761D")
+p1 <- CARD_visualize_pie(
+	proportion = CARD_obj@Proportion_CARD,
+	spatial_location = CARD_obj@spatial_location, 
+ 	colors = colors, 
+  	radius = 0.52) ### You can choose radius = NULL or your own radius number
+print(p1)
+```
+
+Then, we can select some interested cell types to visualize separately. 
+
+```{r}
+## select the cell type that we are interested
+ct.visualize = c("Acinar_cells","Cancer_clone_A","Cancer_clone_B",
+                 "Ductal_terminal_ductal_like","Ductal_CRISP3_high-centroacinar_like",
+                 "Ductal_MHC_Class_II","Ductal_APOL1_high-hypoxic","Fibroblasts")
+## visualize the spatial distribution of the cell type proportion
+p2 <- CARD_visualize_prop(
+	proportion = CARD_obj@Proportion_CARD,        
+	spatial_location = CARD_obj@spatial_location, 
+	### selected cell types to visualize
+	ct.visualize = ct.visualize,    
+	### if not provide, we will use the default colors
+	colors = c("lightblue","lightyellow","red"), 
+	### number of columns in the figure panel
+	NumCols = 4,         
+	### point size in ggplot2 scatterplot  
+    pointSize = 3.0)                            
+print(p2)
+```
+
+### 4. Visualize the proportion for two cell types
+We added a new visualization function to visualize the distribution of two cell 
+types on the same post.  
+
+```{r}
+## visualize the spatial distribution of two cell types on the same plot
+p3 = CARD_visualize_prop_2CT(
+### Cell type proportion estimated by CARD
+proportion = CARD_obj@Proportion_CARD,  
+### spatial location information
+spatial_location = CARD_obj@spatial_location,       
+### two cell types you want to visualize
+ct2.visualize = c("Cancer_clone_A","Cancer_clone_B"), 
+### two color scales 
+colors = list(c("lightblue","lightyellow","red"),c("lightblue","lightyellow","black")))                                  
+print(p3)
+```
+
+### 5. Visualize the cell type proportion correlation 
+```{r}
+# if not provide, we will use the default colors
+p4 <- CARD_visualize_Cor(CARD_obj@Proportion_CARD,colors = NULL) 
+print(p4)
+```
+
+## Refined spatial map
+A unique feature of CARD is its ability to model the spatial correlation in cell 
+type composition across tissue locations, thus enabling spatially informed cell 
+type deconvolution. Modeling spatial correlation allows us to not only accurately 
+infer the cell type composition on each spatial location, but also impute cell 
+type compositions and gene expression levels on unmeasured tissue locations, 
+facilitating the construction of a refined spatial tissue map with a resolution 
+much higher than that measured in the original study.
+Specifically, CARD constructed a refined spatial map through the 
+function `CARD_imputation`. The essential inputs are:
+
+- CARD_object: CARD Object with estimated cell type compositions on the original 
+spatial resolved transcriptomics data.
+- NumGrids: Initial number of newly grided spatial locations. The final number 
+of newly grided spatial locations will be lower than this value since the newly 
+grided locations outside the shape of the tissue will be filtered. 
+- ineibor: Numeric, number of neighbors used in the imputation on newly grided 
+spatial locations, default is 10.  
+
+Briefly, CARD first outlined the shape of the tissue by applying a two-dimensional 
+concave hull algorithm on the existing locations, then perform imputation on the 
+newly grided spatial locations. We recommend to check the exisiting spatial locations 
+to see if there are outliers that are seriously affect the detection of the shape. 
+
+### 1. Imputation on the newly grided spatial locations
+
+```{r}
+CARD_obj = CARD_imputation(CARD_obj,NumGrids = 2000,ineibor = 10,exclude = NULL)
+## The rownames of locations are matched ...
+## Make grids on new spatial locations ...
+```
+
+The results are store in `CARD_obj@refined_prop` and `CARD_obj@refined_expression`
+
+```{r}
+## Visualize the newly grided spatial locations to see if the shape is correctly 
+## detected. If not, the user can provide the row names of the excluded spatial 
+## location data into the CARD_imputation function
+location_imputation = cbind.data.frame(
+    x=as.numeric(sapply(strsplit(rownames(CARD_obj@refined_prop),split="x"),"[",1)),
+	y=as.numeric(sapply(strsplit(rownames(CARD_obj@refined_prop),split="x"),"[",2)))
+rownames(location_imputation) = rownames(CARD_obj@refined_prop)
+library(ggplot2)
+p5 <- ggplot(location_imputation, 
+       aes(x = x, y = y)) + geom_point(shape=22,color = "#7dc7f5")+
+theme(plot.margin = margin(0.1, 0.1, 0.1, 0.1, "cm"),
+    legend.position="bottom",
+    panel.background = element_blank(),
+    plot.background = element_blank(),
+    panel.border = element_rect(colour = "grey89", fill=NA, linewidth =0.5))
+print(p5)
+```
+
+
+### 2. Visualize the cell type proportion at an enhanced resolution
+Now we can use the same `CARD_visualize_prop` function to visualize the cell 
+type proportion at the enhanced resolution. But this time, the input of the 
+function should be the imputed cell typr propotion and corresponding newly 
+grided spatial locations.
+
+```{r}
+p6 <- CARD_visualize_prop(
+	proportion = CARD_obj@refined_prop,                         
+	spatial_location = location_imputation,            
+	ct.visualize = ct.visualize,                    
+	colors = c("lightblue","lightyellow","red"),    
+	NumCols = 4)                                  
+print(p6)
+```
+
+### 3. Visualize the marker gene expression at an enhanced resolution
+After we obtained cell type proportion at the enhanced resolution by CARD, we can 
+predict the spatial gene expression at the enhanced resolution. The following code 
+is to visualize the marker gene expression at an enhanced resolution.
+
+```{r}
+p7 <- CARD_visualize_gene(
+	spatial_expression = CARD_obj@refined_expression,
+	spatial_location = location_imputation,
+	gene.visualize = c("A4GNT", "AAMDC","CD248"),
+	colors = NULL,
+	NumCols = 6)
+print(p7)
+```
+
+Now, compare with the original resolution, CARD facilitates the construction of a 
+refined spatial tissue map with a resolution much higher than that measured in 
+the original study.
+
+```{r}
+p8 <- CARD_visualize_gene(
+	spatial_expression = CARD_obj@spatial_countMat,
+	spatial_location = CARD_obj@spatial_location,
+	gene.visualize = c("A4GNT", "AAMDC","CD248"),
+	colors = NULL,
+	NumCols = 6)
+print(p8)
+```
+
+
+## Extension of CARD in a reference-free version: CARDfree
+We extended CARD to enable reference-free cell type deconvolution and eliminate 
+the need for the single-cell reference data. We refer to this extension as the 
+reference-free version of CARD, or simply as CARDfree. Different from CARD, 
+CARDfree no longer requires an external single-cell reference dataset and only 
+needs users to input a list of gene names for previously known cell type markers. 
+We use the same exmple dataset to illustrate the use of CARDfree. In addition to 
+the exmple dataset, CARDfree also requires the input of marker gene list, which 
+is in a list format with each element of the list being the cell type specific 
+gene markers. The example marker list for runing the tutorial is included. 
+
+Similar to CARD, we will first need to create a CARDfree object with the spatial 
+transcriptomics dataset and the marker gene list 
+
+### 1. Create an `CARDfree` object
+The CARDfree object is created by the function `createCARDfreeObject`. Briefly, 
+the essential inputs are the same as the function `createCARDObject`, except 
+that this function does not require the single cell count and meta information 
+matrix. Instead, it requires a markerList. 
+
+```{r}
+data(markerList)
+CARDfree_obj = createCARDfreeObject(
+	markerList = markerList,
+	spatial_count = spatial_count,
+	spatial_location = spatial_location,
+	minCountGene = 100,
+	minCountSpot =5) 
+```
+
+The spatial data are stored in `CARDfree_obj@spatial_countMat` and `CARDfree_obj@spatial_location`
+while the marker list is stored in CARDfree_objj@markerList in the format of list. 
+
+### 2. Deconvolution using CARDfree
+```{r}
+## deconvolution using CARDfree
+CARDfree_obj = CARD_refFree(CARDfree_obj)
+```
+
+The results are stored in `CARDfree_obj@Proportion_CARD`. 
+
+```{r}
+## One limitation of reference-free version of CARD is that the cell types inferred 
+## from CARDfree do not come with a cell type label. It might be difficult to 
+## interpret the results. 
+print(CARDfree_obj@Proportion_CARD[1:2,])
+```
+
+### 3. Visualization of the results of CARDfree
+Note that here because the number of spots is relatively small, so jointly visualize 
+the cell type proportion matrix in the scatterpie plot format is duable. We do not 
+recommend users to visualize this plot when the number of spots is > 500. Instead, 
+we recommend users to visualize the proportion directly, i.e., using the function 
+CARD_visualize_prop(). 
+
+```{r}
+colors = c("#FFD92F","#4DAF4A","#FCCDE5","#D9D9D9","#377EB8","#7FC97F","#BEAED4"
+           ,"#FDC086","#FFFF99","#386CB0","#F0027F","#BF5B17","#666666","#1B9E77"
+           ,"#D95F02","#7570B3","#E7298A","#66A61E","#E6AB02","#A6761D")
+### In order to maximumply match with the original results of CARD, we order the colors to generally match with the results infered by CARD
+CARDfree_obj@Proportion_CARD = 
+    CARDfree_obj@Proportion_CARD[,c(8,10,14,2,1,6,12,18,7,13,20,19,16,17,11,15,4,9,3,5)]
+colnames(CARDfree_obj@Proportion_CARD) = paste0("CT",1:20)
+p9 <- CARD_visualize_pie(CARDfree_obj@Proportion_CARD,CARDfree_obj@spatial_location,colors = colors)
+print(p9)
+```
+
+## Extension of CARD for single cell resolution mapping
+We also extended CARD to facilitate the construction of single-cell resolution 
+spatial transcriptomics from non-single-cell resolution spatial transcriptomics. 
+Details of the algorithm see the main text. Briefly, we infer the single cell 
+resolution gene expression for each measured spatial location from the non-single 
+cell resolution spatial transcriptomics data based on reference scRNaseq data we 
+used for deconvolution. The procedure is implemented in the function `CARD_SCMapping`. 
+The essential inputs are:
+- CARD_object: CARD object create by the createCARDObject function. This one should 
+be the one after we finish the deconvolution procedure
+- shapeSpot: a character indicating whether the sampled spatial coordinates for 
+single cells locating in a Square-like region or a Circle-like region. The center 
+of this region is the measured spatial location in the non-single cell resolution 
+spatial transcriptomics data. The default is "Square", and the other option is "Circle"
+- numCell: a numeric value indicating the number of cores used to accelerate 
+the procedure.
+```{r}
+#### Note that here the shapeSpot is the user defined variable which indicates the 
+## capturing area of single cells. Details see above.
+scMapping = CARD_SCMapping(CARD_obj,shapeSpot="Square",numCell=20,ncore=2)
+print(scMapping)
+### spatial location info and expression count of the single cell resolution data
+MapCellCords = as.data.frame(colData(scMapping))
+count_SC = assays(scMapping)$counts
+```
+
+The results are stored in a SingleCellExperiment object with mapped single cell 
+resolution counts stored in the assays slot and the information of the spatial 
+location for each single cell as well as their relashionship to the original 
+measured spatial location is stored in the colData slot. 
+
+Next, we visualize the cell type for each single cell with their spatial location 
+information 
+```{r}
+df = MapCellCords
+colors = c("#8DD3C7","#CFECBB","#F4F4B9","#CFCCCF","#D1A7B9","#E9D3DE","#F4867C","#C0979F",
+	"#D5CFD6","#86B1CD","#CEB28B","#EDBC63","#C59CC5","#C09CBF","#C2D567","#C9DAC3","#E1EBA0",
+	"#FFED6F","#CDD796","#F8CDDE")
+p10 = ggplot(df, aes(x = x, y = y, colour = CT)) + 
+    geom_point(size = 3.0) +
+    scale_colour_manual(values =  colors) +
+    #facet_wrap(~Method,ncol = 2,nrow = 3) + 
+        theme(plot.margin = margin(0.1, 0.1, 0.1, 0.1, "cm"),
+              panel.background = element_rect(colour = "white", fill="white"),
+              plot.background = element_rect(colour = "white", fill="white"),
+    legend.position="bottom",
+    panel.border = element_rect(colour = "grey89", fill=NA, size=0.5),
+    axis.text =element_blank(),
+    axis.ticks =element_blank(),
+    axis.title =element_blank(),
+    legend.title=element_text(size = 13,face="bold"),
+    legend.text=element_text(size = 12),
+    legend.key = element_rect(colour = "transparent", fill = "white"),
+    legend.key.size = unit(0.45, 'cm'),
+    strip.text = element_text(size = 15,face="bold"))+
+                                guides(color=guide_legend(title="Cell Type"))
+print(p10)
+```
+
+## References
+Ma, Y., Zhou, X. Spatially informed cell-type deconvolution for spatial transcriptomics. 
+Nat Biotechnol 40, 1349–1359 (2022). https://doi.org/10.1038/s41587-022-01273-7
+
+Moncada, R., Barkley, D., Wagner, F. et al. Integrating microarray-based spatial 
+transcriptomics and single-cell RNA-seq reveals tissue architecture in pancreatic 
+ductal adenocarcinomas. Nat Biotechnol 38, 333–342 (2020). https://doi.org/10.1038/s41587-019-0392-8
+
+
