@@ -7,11 +7,16 @@
 sampleGridWithin(location, numSample, concavity = 2)
 }
 \arguments{
-\item{location}{Data frame, spatial location data frame of the original spatial resolved transcriptomics dataset, stored in the CARD_object@spatial_location}
+\item{location}{Data frame, spatial location data frame of the original
+spatial resolved transcriptomics dataset, stored in the
+CARD_object@spatial_location}
 
-\item{numSample}{Numeric, approximate number of cells in grid within the shape of the spatial location data frame}
+\item{numSample}{Numeric, approximate number of cells in grid within the
+shape of the spatial location data frame}
 
-\item{concavity}{Numeric, a relative measure of concavity. The default is 2.0, which can prodecure detailed enough shapes. Infinity results in a convex hull while 1 results in a more detailed shape.}
+\item{concavity}{Numeric, a relative measure of concavity. The default is
+2.0, which can prodecure detailed enough shapes. Infinity results in a
+convex hull while 1 results in a more detailed shape.}
 }
 \value{
 Return a list of data frame with newly grided points

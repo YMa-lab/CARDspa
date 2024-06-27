@@ -2,7 +2,8 @@
 % Please edit documentation in R/CARD.prop.R
 \name{CARD_deconvolution}
 \alias{CARD_deconvolution}
-\title{Spatially Informed Cell Type Deconvolution for Spatial Transcriptomics by CARD}
+\title{Spatially Informed Cell Type Deconvolution for Spatial Transcriptomics
+by CARD}
 \usage{
 CARD_deconvolution(CARD_object)
 }
@@ -10,10 +11,12 @@ CARD_deconvolution(CARD_object)
 \item{CARD_object}{CARD object create by the createCARDObject function}
 }
 \value{
-Returns a CARD object with estimated cell type proportion stored in object@Proportion_CARD.
+Returns a CARD object with estimated cell type proportion stored
+in object@Proportion_CARD.
 }
 \description{
-Spatially Informed Cell Type Deconvolution for Spatial Transcriptomics by CARD
+Spatially Informed Cell Type Deconvolution for Spatial Transcriptomics
+by CARD
 }
 \examples{
 library(RcppML)
@@ -23,16 +26,16 @@ data(spatial_count)
 data(spatial_location)
 data(sc_count)
 data(sc_meta)
-CARD_obj = createCARDObject(
-sc_count = sc_count,
-sc_meta = sc_meta,
-spatial_count = spatial_count,
-spatial_location = spatial_location,
-ct.varname = "cellType",
-ct.select = unique(sc_meta$cellType),
-sample.varname = "sampleInfo",
-minCountGene = 100,
-minCountSpot = 5)
-CARD_obj = CARD_deconvolution(CARD_object = CARD_obj)
-print(CARD_obj@Proportion_CARD[1:3,1:3])
+CARD_obj <- createCARDObject(
+    sc_count = sc_count,
+    sc_meta = sc_meta,
+    spatial_count = spatial_count,
+    spatial_location = spatial_location,
+    ct.varname = "cellType",
+    ct.select = unique(sc_meta$cellType),
+    sample.varname = "sampleInfo",
+    minCountGene = 100,
+    minCountSpot = 5
+)
+CARD_obj <- CARD_deconvolution(CARD_object = CARD_obj)
 }

@@ -3,31 +3,43 @@
 \docType{class}
 \name{CARD-class}
 \alias{CARD-class}
-\title{Each CARD object has a number of slots which store information. Key slots to access
-are listed below.}
+\title{Each CARD object has a number of slots which store information. Key
+slots to access are listed below.}
+\value{
+Return an object of CARD class
+}
 \description{
-Each CARD object has a number of slots which store information. Key slots to access
-are listed below.
+Each CARD object has a number of slots which store information. Key
+slots to access are listed below.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{sc_eset}}{The filtered scRNA-seq data along with meta data stored in the format of SingleCellExperiment.}
+\item{\code{sc_eset}}{The filtered scRNA-seq data along with meta data stored
+in the format of SingleCellExperiment.}
 
 \item{\code{spatial_countMat}}{The filtered spatial count data.}
 
-\item{\code{spatial_location}}{The weights for combining p-values from multiple kernels.}
+\item{\code{spatial_location}}{The weights for combining p-values from multiple
+kernels.}
 
-\item{\code{Proportion_CARD}}{The estimated cell type proportion by CARD with each row is a spatial location and each column is a cell type.}
+\item{\code{Proportion_CARD}}{The estimated cell type proportion by
+CARD with each row is a spatial location and each column is a
+cell type.}
 
 \item{\code{project}}{The name of the project, default is deconvolution.}
 
 \item{\code{info_parameters}}{The paramters that are used in model fitting.}
 
-\item{\code{algorithm_matrix}}{The intermediate matrices that are used in the model fitting step.}
+\item{\code{algorithm_matrix}}{The intermediate matrices that are used in
+the model fitting step.}
 
-\item{\code{refined_prop}}{The refined cell type proportion matrix estimated by CARD for the newly grided spatial locations. The number of initial grids are defined by the user.}
+\item{\code{refined_prop}}{The refined cell type proportion matrix estimated
+by CARD for the newly grided spatial locations. The number of
+initial grids are defined by the user.}
 
-\item{\code{refined_expression}}{The refined predicted expression matrix (normalized) estimated by CARD for the newly grided spatial locations. The number of initial grids are defined by the user.}
+\item{\code{refined_expression}}{The refined predicted expression matrix
+(normalized) estimated by CARD for the newly grided spatial locations.
+The number of initial grids are defined by the user.}
 }}
 

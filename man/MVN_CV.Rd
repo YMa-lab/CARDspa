@@ -2,7 +2,9 @@
 % Please edit documentation in R/CARD.imputation.R
 \name{MVN_CV}
 \alias{MVN_CV}
-\title{Imputation and Construction of High-Resolution Spatial Maps for Cell Type Composition and Gene Expression by the spatial correlation structure between original spatial locations and new grided spatial locations}
+\title{Imputation and Construction of High-Resolution Spatial Maps for Cell Type
+Composition and Gene Expression by the spatial correlation structure between
+original spatial locations and new grided spatial locations}
 \usage{
 MVN_CV(
   Vtrain,
@@ -20,7 +22,9 @@ MVN_CV(
 \arguments{
 \item{Vtrain}{Matrix, estimated V matrix from CARD}
 
-\item{locationOrig}{Data frame, spatial location data frame of the original spatial resolved transcriptomics dataset, stored in the CARD_object@spatial_location}
+\item{locationOrig}{Data frame, spatial location data frame of the original
+spatial resolved transcriptomics dataset, stored in the
+CARD_object@spatial_location}
 
 \item{trainInd}{Vector, index of the original spatial locations}
 
@@ -28,19 +32,25 @@ MVN_CV(
 
 \item{B}{Matrix, used in the deconvolution as the reference basis matrix}
 
-\item{Xinput_norm}{Matrix, used in the deconvolution as the normalized spatial count data}
+\item{Xinput_norm}{Matrix, used in the deconvolution as the normalized
+spatial count data}
 
-\item{Optimalb}{Vector, vector of the intercept for each cel type estimated based on the original spatial resolution}
+\item{Optimalb}{Vector, vector of the intercept for each cel type estimated
+based on the original spatial resolution}
 
 \item{OptimalPhi}{Numeric, the optimal phi value stored in CARD_object}
 
 \item{lambda}{Vector, vector of cell type specific scalar in the CAR model}
 
-\item{ineibor}{Numeric, number of neighbors used in the imputation on newly grided spatial locations, default is 10.}
+\item{ineibor}{Numeric, number of neighbors used in the imputation on newly
+grided spatial locations, default is 10.}
 }
 \value{
-Return a list with the imputed Cell type composition Vtest matrix on the newly grided spatial locations and predicted normalized gene expression
+Return a list with the imputed Cell type composition Vtest matrix on
+the newly grided spatial locations and predicted normalized gene expression
 }
 \description{
-Imputation and Construction of High-Resolution Spatial Maps for Cell Type Composition and Gene Expression by the spatial correlation structure between original spatial locations and new grided spatial locations
+Imputation and Construction of High-Resolution Spatial Maps for Cell Type
+Composition and Gene Expression by the spatial correlation structure between
+original spatial locations and new grided spatial locations
 }

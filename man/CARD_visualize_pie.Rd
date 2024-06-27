@@ -2,7 +2,8 @@
 % Please edit documentation in R/visualization.R
 \name{CARD_visualize_pie}
 \alias{CARD_visualize_pie}
-\title{Visualize the spatial distribution of cell type proportion in a geom scatterpie plot}
+\title{Visualize the spatial distribution of cell type proportion in a geom
+scatterpie plot}
 \usage{
 CARD_visualize_pie(
   proportion,
@@ -13,21 +14,26 @@ CARD_visualize_pie(
 )
 }
 \arguments{
-\item{proportion}{Data frame, cell type proportion estimated by CARD in either original resolution or enhanced resolution.}
+\item{proportion}{Data frame, cell type proportion estimated by CARD in
+either original resolution or enhanced resolution.}
 
 \item{spatial_location}{Data frame, spatial location information.}
 
-\item{colors}{Vector of color names that you want to use, if NULL, we will use the color palette "Spectral" from RColorBrewer package.}
+\item{colors}{Vector of color names that you want to use, if NULL, we will
+use the color palette "Spectral" from RColorBrewer package.}
 
-\item{radius}{Numeric value about the radius of each pie chart, if NULL, we will calculate it inside the function.}
+\item{radius}{Numeric value about the radius of each pie chart, if NULL, we
+will calculate it inside the function.}
 
-\item{seed}{Seed number about generating the colors if users do not provide the colors, if NULL, we will generate it inside the function}
+\item{seed}{Seed number about generating the colors if users do not provide
+the colors, if NULL, we will generate it inside the function}
 }
 \value{
 Returns a ggplot2 figure.
 }
 \description{
-Visualize the spatial distribution of cell type proportion in a geom scatterpie plot
+Visualize the spatial distribution of cell type proportion in a geom
+scatterpie plot
 }
 \examples{
 library(ggplot2)
@@ -35,23 +41,28 @@ data(spatial_count)
 data(spatial_location)
 data(sc_count)
 data(sc_meta)
-CARD_obj = createCARDObject(
-sc_count = sc_count,
-sc_meta = sc_meta,
-spatial_count = spatial_count,
-spatial_location = spatial_location,
-ct.varname = "cellType",
-ct.select = unique(sc_meta$cellType),
-sample.varname = "sampleInfo",
-minCountGene = 100,
-minCountSpot = 5)
-CARD_obj = CARD_deconvolution(CARD_object = CARD_obj)
-colors = c("#FFD92F","#4DAF4A","#FCCDE5","#D9D9D9","#377EB8","#7FC97F","#BEAED4",
-"#FDC086","#FFFF99","#386CB0","#F0027F","#BF5B17","#666666","#1B9E77","#D95F02",
-"#7570B3","#E7298A","#66A61E","#E6AB02","#A6761D")
+CARD_obj <- createCARDObject(
+    sc_count = sc_count,
+    sc_meta = sc_meta,
+    spatial_count = spatial_count,
+    spatial_location = spatial_location,
+    ct.varname = "cellType",
+    ct.select = unique(sc_meta$cellType),
+    sample.varname = "sampleInfo",
+    minCountGene = 100,
+    minCountSpot = 5
+)
+CARD_obj <- CARD_deconvolution(CARD_object = CARD_obj)
+colors <- c(
+    "#FFD92F", "#4DAF4A", "#FCCDE5", "#D9D9D9", "#377EB8", "#7FC97F",
+    "#BEAED4", "#FDC086", "#FFFF99", "#386CB0", "#F0027F", "#BF5B17", 
+    "#666666", "#1B9E77", "#D95F02", "#7570B3", "#E7298A", "#66A61E", 
+    "#E6AB02", "#A6761D"
+)
 CARD_visualize_pie(
-proportion = CARD_obj@Proportion_CARD,
-spatial_location = CARD_obj@spatial_location,
-colors = colors,
-radius = 0.52)
+    proportion = slot(CARD_obj, "Proportion_CARD"),
+    spatial_location = slot(CARD_obj, "spatial_location"),
+    colors = colors,
+    radius = 0.52
+)
 }

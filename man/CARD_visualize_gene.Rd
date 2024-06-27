@@ -13,15 +13,19 @@ CARD_visualize_gene(
 )
 }
 \arguments{
-\item{spatial_expression}{Data frame, spatial gene expression in either original resolution or enhanced resolution.}
+\item{spatial_expression}{Data frame, spatial gene expression in either
+original resolution or enhanced resolution.}
 
 \item{spatial_location}{Data frame, spatial location information.}
 
-\item{gene.visualize}{Vector of selected gene names that are interested to visualize}
+\item{gene.visualize}{Vector of selected gene names that are interested to
+visualize}
 
-\item{colors}{Vector of color names that you want to use, if NULL, we will use the default color scale in virdis palette}
+\item{colors}{Vector of color names that you want to use, if NULL, we will
+use the default color scale in virdis palette}
 
-\item{NumCols}{Numeric, number of columns in the figure panel, it depends on the number of cell types you want to visualize.}
+\item{NumCols}{Numeric, number of columns in the figure panel, it depends on
+the number of cell types you want to visualize.}
 }
 \value{
 Returns a ggplot2 figure.
@@ -35,22 +39,24 @@ data(spatial_count)
 data(spatial_location)
 data(sc_count)
 data(sc_meta)
-CARD_obj = createCARDObject(
-sc_count = sc_count,
-sc_meta = sc_meta,
-spatial_count = spatial_count,
-spatial_location = spatial_location,
-ct.varname = "cellType",
-ct.select = unique(sc_meta$cellType),
-sample.varname = "sampleInfo",
-minCountGene = 100,
-minCountSpot = 5)
-CARD_obj = CARD_deconvolution(CARD_object = CARD_obj)
+CARD_obj <- createCARDObject(
+    sc_count = sc_count,
+    sc_meta = sc_meta,
+    spatial_count = spatial_count,
+    spatial_location = spatial_location,
+    ct.varname = "cellType",
+    ct.select = unique(sc_meta$cellType),
+    sample.varname = "sampleInfo",
+    minCountGene = 100,
+    minCountSpot = 5
+)
+CARD_obj <- CARD_deconvolution(CARD_object = CARD_obj)
 CARD_visualize_gene(
-spatial_expression = CARD_obj@spatial_countMat,
-spatial_location = CARD_obj@spatial_location,
-gene.visualize = c("A4GNT", "AAMDC","CD248"),
-colors = NULL,
-NumCols = 6)
+    spatial_expression = slot(CARD_obj, "spatial_countMat"),
+    spatial_location = slot(CARD_obj, "spatial_location"),
+    gene.visualize = c("A4GNT", "AAMDC", "CD248"),
+    colors = NULL,
+    NumCols = 6
+)
 
 }

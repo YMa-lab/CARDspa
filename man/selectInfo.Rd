@@ -9,13 +9,18 @@ selectInfo(Basis, sc_eset, commonGene, ct.select, ct.varname)
 \arguments{
 \item{Basis}{Reference basis matrix.}
 
-\item{sc_eset}{scRNAseq data along with meta data stored in the S4 class format (SingleCellExperiment).}
+\item{sc_eset}{scRNAseq data along with meta data stored in the S4 class
+format (SingleCellExperiment).}
 
-\item{commonGene}{common genes between scRNAseq count data and spatial resolved transcriptomics data.}
+\item{commonGene}{common genes between scRNAseq count data and spatial
+resolved transcriptomics data.}
 
-\item{ct.select}{vector of cell type names that you are interested in to deconvolute, default as NULL. If NULL, then use all cell types provided by single cell dataset;}
+\item{ct.select}{vector of cell type names that you are interested in to
+deconvolute, default as NULL. If NULL, then use all cell types provided by
+single cell dataset;}
 
-\item{ct.varname}{character, the name of the column in metaData that specifies the cell type annotation information}
+\item{ct.varname}{character, the name of the column in metaData that
+specifies the cell type annotation information}
 }
 \value{
 a vector of informative genes selected

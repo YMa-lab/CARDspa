@@ -7,9 +7,11 @@
 CARD_visualize_Cor(proportion, colors = colors)
 }
 \arguments{
-\item{proportion}{Data frame, cell type proportion estimated by CARD in either original resolution or enhanced resolution.}
+\item{proportion}{Data frame, cell type proportion estimated by CARD in
+either original resolution or enhanced resolution.}
 
-\item{colors}{Vector of color names that you want to use, if NULL, we will use the default color scale c("#91a28c","white","#8f2c37")}
+\item{colors}{Vector of color names that you want to use, if NULL, we will
+use the default color scale c("#91a28c","white","#8f2c37")}
 }
 \value{
 Returns a ggcorrplot figure.
@@ -23,16 +25,17 @@ data(spatial_count)
 data(spatial_location)
 data(sc_count)
 data(sc_meta)
-CARD_obj = createCARDObject(
-sc_count = sc_count,
-sc_meta = sc_meta,
-spatial_count = spatial_count,
-spatial_location = spatial_location,
-ct.varname = "cellType",
-ct.select = unique(sc_meta$cellType),
-sample.varname = "sampleInfo",
-minCountGene = 100,
-minCountSpot = 5)
-CARD_obj = CARD_deconvolution(CARD_object = CARD_obj)
-CARD_visualize_Cor(CARD_obj@Proportion_CARD,colors = NULL)
+CARD_obj <- createCARDObject(
+    sc_count = sc_count,
+    sc_meta = sc_meta,
+    spatial_count = spatial_count,
+    spatial_location = spatial_location,
+    ct.varname = "cellType",
+    ct.select = unique(sc_meta$cellType),
+    sample.varname = "sampleInfo",
+    minCountGene = 100,
+    minCountSpot = 5
+)
+CARD_obj <- CARD_deconvolution(CARD_object = CARD_obj)
+CARD_visualize_Cor(slot(CARD_obj, "Proportion_CARD"), colors = NULL)
 }

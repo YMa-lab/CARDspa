@@ -17,26 +17,38 @@ createCARDObject(
 )
 }
 \arguments{
-\item{sc_count}{Raw scRNA-seq count data, each column is a cell and each row is a gene.}
+\item{sc_count}{Raw scRNA-seq count data, each column is a cell and each row
+is a gene.}
 
-\item{sc_meta}{data frame, with each row representing the cell type and/or sample information of a specific cell. The row names of this data frame should match exactly with the column names of the sc_count data}
+\item{sc_meta}{data frame, with each row representing the cell type and/or
+sample information of a specific cell. The row names of this data frame
+should match exactly with the column names of the sc_count data}
 
-\item{spatial_count}{Raw spatial resolved transcriptomics data, each column is a spatial location, and each row is a gene.}
+\item{spatial_count}{Raw spatial resolved transcriptomics data, each column
+is a spatial location, and each row is a gene.}
 
-\item{spatial_location}{data frame, with two columns representing the x and y coordinates of the spatial location. The rownames of this data frame should match eaxctly with the columns of the spatial_count.}
+\item{spatial_location}{data frame, with two columns representing the x and
+y coordinates of the spatial location. The rownames of this data frame
+should match eaxctly with the columns of the spatial_count.}
 
-\item{ct.varname}{character, the name of the column in metaData that specifies the cell type annotation information}
+\item{ct.varname}{character, the name of the column in metaData that
+specifies the cell type annotation information}
 
-\item{ct.select}{vector of cell type names that you are interested in to deconvolute, default as NULL. If NULL, then use all cell types provided by single cell dataset;}
+\item{ct.select}{vector of cell type names that you are interested in to
+deconvolute, default as NULL. If NULL, then use all cell types provided by
+single cell dataset;}
 
-\item{sample.varname}{character,the name of the column in metaData that specifies the sample information. If NULL, we just use the whole as one sample.}
+\item{sample.varname}{character,the name of the column in metaData that
+specifies the sample information. If NULL, we just use the whole as one
+sample.}
 
 \item{minCountGene}{Minimum counts for each gene}
 
 \item{minCountSpot}{Minimum counts for each spatial location}
 }
 \value{
-Returns CARD object with filtered spatial count and single cell RNA-seq dataset.
+Returns CARD object with filtered spatial count and single cell
+RNA-seq dataset.
 }
 \description{
 Create the CARD object
@@ -46,15 +58,16 @@ data(spatial_count)
 data(spatial_location)
 data(sc_count)
 data(sc_meta)
-CARD_obj = createCARDObject(
-sc_count = sc_count,
-sc_meta = sc_meta,
-spatial_count = spatial_count,
-spatial_location = spatial_location,
-ct.varname = "cellType",
-ct.select = unique(sc_meta$cellType),
-sample.varname = "sampleInfo",
-minCountGene = 100,
-minCountSpot = 5)
+CARD_obj <- createCARDObject(
+    sc_count = sc_count,
+    sc_meta = sc_meta,
+    spatial_count = spatial_count,
+    spatial_location = spatial_location,
+    ct.varname = "cellType",
+    ct.select = unique(sc_meta$cellType),
+    sample.varname = "sampleInfo",
+    minCountGene = 100,
+    minCountSpot = 5
+)
 
 }

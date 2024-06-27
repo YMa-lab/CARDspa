@@ -2,22 +2,31 @@
 % Please edit documentation in R/CARD.prop.R
 \name{createscRef}
 \alias{createscRef}
-\title{Construct the mean gene expression basis matrix (B), this is the faster version}
+\title{Construct the mean gene expression basis matrix (B), this is the
+faster version}
 \usage{
 createscRef(x, ct.select = NULL, ct.varname, sample.varname = NULL)
 }
 \arguments{
-\item{x}{S4 class for storing data from single-cell experiments. This format is usually created by the package SingleCellExperiment with stored counts, along with the usual metadata for genes and cells.}
+\item{x}{S4 class for storing data from single-cell experiments. This format
+is usually created by the package SingleCellExperiment with stored counts,
+along with the usual metadata for genes and cells.}
 
-\item{ct.select}{vector of cell type names that you are interested in to deconvolute, default as NULL. If NULL, then use all cell types provided by single cell dataset;}
+\item{ct.select}{vector of cell type names that you are interested in to
+deconvolute, default as NULL. If NULL, then use all cell types provided by
+single cell dataset;}
 
-\item{ct.varname}{character, the name of the column in metaData that specifies the cell type annotation information}
+\item{ct.varname}{character, the name of the column in metaData that
+specifies the cell type annotation information}
 
-\item{sample.varname}{character,the name of the column in metaData that specifies the sample information. If NULL, we just use the whole as one sample.}
+\item{sample.varname}{character,the name of the column in metaData that
+specifies the sample information. If NULL, we just use the whole as one
+sample.}
 }
 \value{
 Return a list of basis (B) matrix
 }
 \description{
-Construct the mean gene expression basis matrix (B), this is the faster version
+Construct the mean gene expression basis matrix (B), this is the
+faster version
 }

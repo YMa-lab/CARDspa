@@ -2,12 +2,15 @@
 % Please edit documentation in R/CARD.imputation.R
 \name{Sigma}
 \alias{Sigma}
-\title{Calculate the variance covariance matrix used in the imputation of the new grided locations}
+\title{Calculate the variance covariance matrix used in the imputation of the
+new grided locations}
 \usage{
 Sigma(locationOrig, trainInd, testInd, OptimalPhi, ineibor)
 }
 \arguments{
-\item{locationOrig}{Data frame, spatial location data frame of the original spatial resolved transcriptomics dataset, stored in the CARD_object@spatial_location}
+\item{locationOrig}{Data frame, spatial location data frame of the original
+spatial resolved transcriptomics dataset, stored in the
+CARD_object@spatial_location}
 
 \item{trainInd}{Vector, index of the original spatial locations}
 
@@ -15,11 +18,14 @@ Sigma(locationOrig, trainInd, testInd, OptimalPhi, ineibor)
 
 \item{OptimalPhi}{Numeric, the optimal phi value stored in CARD_object}
 
-\item{ineibor}{Numeric, number of neighbors used in the imputation on newly grided spatial locations, default is 10.}
+\item{ineibor}{Numeric, number of neighbors used in the imputation on newly
+grided spatial locations, default is 10.}
 }
 \value{
-Return a list with the imputed Cell type composition Vtest matrix on the newly grided spatial locations and predicted normalized gene expression
+Return a list with the imputed Cell type composition Vtest matrix on
+the newly grided spatial locations and predicted normalized gene expression
 }
 \description{
-Calculate the variance covariance matrix used in the imputation of the new grided locations
+Calculate the variance covariance matrix used in the imputation of the
+new grided locations
 }

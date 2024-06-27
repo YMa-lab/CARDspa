@@ -2,7 +2,8 @@
 % Please edit documentation in R/visualization.R
 \name{CARD_visualize_prop_2CT}
 \alias{CARD_visualize_prop_2CT}
-\title{Visualize the spatial distribution of two cell type proportions on the same plot}
+\title{Visualize the spatial distribution of two cell type proportions on
+the same plot}
 \usage{
 CARD_visualize_prop_2CT(
   proportion,
@@ -12,20 +13,24 @@ CARD_visualize_prop_2CT(
 )
 }
 \arguments{
-\item{proportion}{Data frame, cell type proportion estimated by CARD in either original resolution or enhanced resolution.}
+\item{proportion}{Data frame, cell type proportion estimated by CARD in
+either original resolution or enhanced resolution.}
 
 \item{spatial_location}{Data frame, spatial location information.}
 
-\item{ct2.visualize}{Vector of selected two cell type names that are interested to visualize, here we only focus on two cell types}
+\item{ct2.visualize}{Vector of selected two cell type names that are
+interested to visualize, here we only focus on two cell types}
 
-\item{colors}{list of color names that you want to use for each cell type, if NULL, we will use the default color scale list
+\item{colors}{list of color names that you want to use for each cell type,
+if NULL, we will use the default color scale list
 list(c("lightblue","lightyellow","red"),c("lightblue","lightyellow","black")}
 }
 \value{
 Returns a ggplot2 figure.
 }
 \description{
-Visualize the spatial distribution of two cell type proportions on the same plot
+Visualize the spatial distribution of two cell type proportions on
+the same plot
 }
 \examples{
 library(ggplot2)
@@ -33,21 +38,26 @@ data(spatial_count)
 data(spatial_location)
 data(sc_count)
 data(sc_meta)
-CARD_obj = createCARDObject(
-sc_count = sc_count,
-sc_meta = sc_meta,
-spatial_count = spatial_count,
-spatial_location = spatial_location,
-ct.varname = "cellType",
-ct.select = unique(sc_meta$cellType),
-sample.varname = "sampleInfo",
-minCountGene = 100,
-minCountSpot = 5)
-CARD_obj = CARD_deconvolution(CARD_object = CARD_obj)
+CARD_obj <- createCARDObject(
+    sc_count = sc_count,
+    sc_meta = sc_meta,
+    spatial_count = spatial_count,
+    spatial_location = spatial_location,
+    ct.varname = "cellType",
+    ct.select = unique(sc_meta$cellType),
+    sample.varname = "sampleInfo",
+    minCountGene = 100,
+    minCountSpot = 5
+)
+CARD_obj <- CARD_deconvolution(CARD_object = CARD_obj)
 CARD_visualize_prop_2CT(
-proportion = CARD_obj@Proportion_CARD,
-spatial_location = CARD_obj@spatial_location,
-ct2.visualize = c("Cancer_clone_A","Cancer_clone_B"),
-colors = list(c("lightblue","lightyellow","red"),c("lightblue","lightyellow","black")))
+    proportion = slot(CARD_obj, "Proportion_CARD"),
+    spatial_location = slot(CARD_obj, "spatial_location"),
+    ct2.visualize = c("Cancer_clone_A", "Cancer_clone_B"),
+    colors = list(c("lightblue", "lightyellow", "red"), c(
+        "lightblue", "lightyellow",
+        "black"
+    ))
+)
 
 }

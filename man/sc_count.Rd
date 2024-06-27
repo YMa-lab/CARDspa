@@ -11,7 +11,7 @@ An object of class \code{dgCMatrix} with 7000 rows and 1926 columns.
 data(sc_count)
 }
 \description{
-The scRNA-seq count data must be in the format of matrix or sparseMatrix, while
-each row represents a gene and each column represents a cell.
+The scRNA-seq count data must be in the format of matrix or sparseMatrix,
+while each row represents a gene and each column represents a cell.
 }
 \keyword{datasets}

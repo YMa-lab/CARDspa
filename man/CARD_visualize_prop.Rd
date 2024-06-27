@@ -14,15 +14,19 @@ CARD_visualize_prop(
 )
 }
 \arguments{
-\item{proportion}{Data frame, cell type proportion estimated by CARD in either original resolution or enhanced resolution.}
+\item{proportion}{Data frame, cell type proportion estimated by CARD in
+either original resolution or enhanced resolution.}
 
 \item{spatial_location}{Data frame, spatial location information.}
 
-\item{ct.visualize}{Vector of selected cell type names that are interested to visualize}
+\item{ct.visualize}{Vector of selected cell type names that are
+interested to visualize}
 
-\item{colors}{Vector of color names that you want to use, if NULL, we will use the default color scale c("lightblue","lightyellow","red")}
+\item{colors}{Vector of color names that you want to use, if NULL, we will
+use the default color scale c("lightblue","lightyellow","red")}
 
-\item{NumCols}{Numeric, number of columns in the figure panel, it depends on the number of cell types you want to visualize.}
+\item{NumCols}{Numeric, number of columns in the figure panel, it depends on
+the number of cell types you want to visualize.}
 
 \item{pointSize}{Size of each point used for plotting}
 }
@@ -38,26 +42,30 @@ data(spatial_count)
 data(spatial_location)
 data(sc_count)
 data(sc_meta)
-CARD_obj = createCARDObject(
-sc_count = sc_count,
-sc_meta = sc_meta,
-spatial_count = spatial_count,
-spatial_location = spatial_location,
-ct.varname = "cellType",
-ct.select = unique(sc_meta$cellType),
-sample.varname = "sampleInfo",
-minCountGene = 100,
-minCountSpot = 5)
-CARD_obj = CARD_deconvolution(CARD_object = CARD_obj)
-ct.visualize = c("Acinar_cells","Cancer_clone_A","Cancer_clone_B",
-"Ductal_terminal_ductal_like","Ductal_CRISP3_high-centroacinar_like",
-"Ductal_MHC_Class_II","Ductal_APOL1_high-hypoxic","Fibroblasts")
+CARD_obj <- createCARDObject(
+    sc_count = sc_count,
+    sc_meta = sc_meta,
+    spatial_count = spatial_count,
+    spatial_location = spatial_location,
+    ct.varname = "cellType",
+    ct.select = unique(sc_meta$cellType),
+    sample.varname = "sampleInfo",
+    minCountGene = 100,
+    minCountSpot = 5
+)
+CARD_obj <- CARD_deconvolution(CARD_object = CARD_obj)
+ct.visualize <- c(
+    "Acinar_cells", "Cancer_clone_A", "Cancer_clone_B",
+    "Ductal_terminal_ductal_like", "Ductal_CRISP3_high-centroacinar_like",
+    "Ductal_MHC_Class_II", "Ductal_APOL1_high-hypoxic", "Fibroblasts"
+)
 CARD_visualize_prop(
-proportion = CARD_obj@Proportion_CARD,
-spatial_location = CARD_obj@spatial_location,
-ct.visualize = ct.visualize,
-colors = c("lightblue","lightyellow","red"),
-NumCols = 4,
-pointSize = 3.0)
+    proportion = slot(CARD_obj, "Proportion_CARD"),
+    spatial_location = slot(CARD_obj, "spatial_location"),
+    ct.visualize = ct.visualize,
+    colors = c("lightblue", "lightyellow", "red"),
+    NumCols = 4,
+    pointSize = 3.0
+)
 
 }
