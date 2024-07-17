@@ -46,14 +46,14 @@ getWeightForCell <-
 #' The center of this region is the measured spatial location in the non-single
 #' cell resolution spatial transcriptomics data. The default is 'Square', the
 #' other shape is 'Circle'
-
+#' @param iseed Seed for initialization
 #' @importFrom spatstat.random runifdisc
 #' @importFrom fields rdist
 #' @importFrom stats runif median
 #' @return Returns a dataframe with the sampled spatial location information
 #' for each single cell
 #'
-getHighresCords <- function(Cords, numCell, shape = "Square") {
+getHighresCords <- function(Cords, numCell, shape = "Square", iseed = 20210107) {
     ED <- rdist(as.matrix(Cords))
     n <- dim(Cords)[1]
     dis <- c()
@@ -61,7 +61,7 @@ getHighresCords <- function(Cords, numCell, shape = "Square") {
         dis[i] <- min(ED[i, -i])
     }
     min_distance <- median(dis) / 2
-    set.seed(20210107)
+    set.seed(seed = iseed)
     Cords_new <- NULL
     for (i in seq_len(nrow(Cords))) {
         getPointsWithinCircle <- function(ED, i, numCell, min_distance) {

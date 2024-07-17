@@ -5,10 +5,12 @@
 \title{Spatially Informed Cell Type Deconvolution for Spatial Transcriptomics
 by CARD}
 \usage{
-CARD_deconvolution(CARD_object)
+CARD_deconvolution(CARD_object, iseed = 20200107)
 }
 \arguments{
 \item{CARD_object}{CARD object create by the createCARDObject function}
+
+\item{iseed}{Seed for initialization}
 }
 \value{
 Returns a CARD object with estimated cell type proportion stored

@@ -3,7 +3,7 @@
 #'
 #' @param CARDfree_object CARDfree object create by the createCARDfreeObject
 #' function.
-#'
+#' @param iseed Seed for initialization
 #' @importFrom Rcpp sourceCpp
 #' @importFrom fields rdist
 
@@ -28,7 +28,7 @@
 #' )
 #' CARDfree_obj <- CARD_refFree(CARDfree_obj)
 #'
-CARD_refFree <- function(CARDfree_object) {
+CARD_refFree <- function(CARDfree_object, iseed = 20200107) {
     ### load in spatial transcriptomics data stored in CARDfree_object
     spatial_countMat <- CARDfree_object@spatial_countMat
     spatial_location <- CARDfree_object@spatial_location
@@ -70,7 +70,7 @@ CARD_refFree <- function(CARDfree_object) {
         } else {
             sink("/dev/null")
         }
-        set.seed(20200107)
+        set.seed(seed = iseed)
         NMFout <- invisible(NMF::nmf(as.matrix(Xinput_norm), numK))
         sink()
         B <- NMFout@fit@W
@@ -83,7 +83,7 @@ CARD_refFree <- function(CARDfree_object) {
         } else {
             sink("/dev/null")
         }
-        set.seed(20200107)
+        set.seed(seed = iseed)
         NMFout <- invisible(RcppML::nmf(as.matrix(Xinput_norm), numK))
         sink()
         B <- NMFout$w
