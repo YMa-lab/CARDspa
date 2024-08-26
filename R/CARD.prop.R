@@ -183,7 +183,6 @@ selectInfo <- function(Basis, sc_eset, commonGene,
 #' by CARD
 #'
 #' @param CARD_object CARD object create by the createCARDObject function
-#' @param iseed Seed for initialization
 #' @importFrom Rcpp sourceCpp
 #' @importFrom MCMCpack rdirichlet
 #' @importFrom fields rdist
@@ -211,7 +210,7 @@ selectInfo <- function(Basis, sc_eset, commonGene,
 #'     minCountSpot = 5
 #' )
 #' CARD_obj <- CARD_deconvolution(CARD_object = CARD_obj)
-CARD_deconvolution <- function(CARD_object, iseed = 20200107) {
+CARD_deconvolution <- function(CARD_object) {
     ct.select <- CARD_object@info_parameters$ct.select
     ct.varname <- CARD_object@info_parameters$ct.varname
     sample.varname <- CARD_object@info_parameters$sample.varname
@@ -265,7 +264,7 @@ CARD_deconvolution <- function(CARD_object, iseed = 20200107) {
     ##### initialize the proportion matrix
     ED <- rdist(as.matrix(norm_cords)) ## Euclidean distance matrix
     message("## Deconvolution Starts! ...\n")
-    set.seed(seed = iseed)
+    #set.seed(seed = 20200107)
     Vint1 <- as.matrix(rdirichlet(ncol(Xinput_norm), rep(10, ncol(B))))
     colnames(Vint1) <- colnames(B)
     rownames(Vint1) <- colnames(Xinput_norm)

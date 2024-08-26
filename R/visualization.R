@@ -236,8 +236,6 @@ CARD_visualize_prop_2CT <- function(
 #' use the color palette "Spectral" from RColorBrewer package.
 #' @param radius Numeric value about the radius of each pie chart, if NULL, we
 #' will calculate it inside the function.
-#' @param seed Seed number about generating the colors if users do not provide
-#' the colors, if NULL, we will generate it inside the function
 #'
 #' @import ggplot2
 #' @importFrom RColorBrewer brewer.pal
@@ -281,8 +279,7 @@ CARD_visualize_pie <- function(
         proportion, 
         spatial_location, 
         colors = NULL,
-        radius = NULL, 
-        seed = NULL) {
+        radius = NULL) {
     res_CARD <- as.data.frame(proportion)
     res_CARD <- res_CARD[, mixedsort(colnames(res_CARD))]
     location <- as.data.frame(spatial_location)
@@ -310,12 +307,12 @@ CARD_visualize_pie <- function(
         if (ncol(res_CARD) > length(colorCandidate)) {
             colors <- colorRampPalette(colorCandidate)(ncol(res_CARD))
         } else {
-            if (is.null(seed)) {
-                iseed <- 12345
-            } else {
-                iseed <- seed
-            }
-            set.seed(iseed)
+            # if (is.null(seed)) {
+            #     iseed <- 12345
+            # } else {
+            #     iseed <- seed
+            # }
+            # set.seed(iseed)
             colors <-
                 colorCandidate[sample(
                     seq_len(length(colorCandidate)),

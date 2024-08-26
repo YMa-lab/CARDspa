@@ -5,13 +5,7 @@
 \title{Visualize the spatial distribution of cell type proportion in a geom
 scatterpie plot}
 \usage{
-CARD_visualize_pie(
-  proportion,
-  spatial_location,
-  colors = NULL,
-  radius = NULL,
-  seed = NULL
-)
+CARD_visualize_pie(proportion, spatial_location, colors = NULL, radius = NULL)
 }
 \arguments{
 \item{proportion}{Data frame, cell type proportion estimated by CARD in
@@ -24,9 +18,6 @@ use the color palette "Spectral" from RColorBrewer package.}
 
 \item{radius}{Numeric value about the radius of each pie chart, if NULL, we
 will calculate it inside the function.}
-
-\item{seed}{Seed number about generating the colors if users do not provide
-the colors, if NULL, we will generate it inside the function}
 }
 \value{
 Returns a ggplot2 figure.

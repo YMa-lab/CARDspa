@@ -176,6 +176,7 @@ For the example dataset with the sample size of 428 locations, it takes
 within a minute to finish the deconvolution. 
 
 ```{r}
+set.seed(seed = 20200107)
 CARD_obj <- CARD_deconvolution(CARD_object = CARD_obj)
 ## create reference matrix from scRNASeq...
 ## Select Informative Genes! ...
@@ -434,6 +435,7 @@ CARDfree_objj@markerList in the format of list.
 ### 2. Deconvolution using CARDfree
 ```{r}
 ## deconvolution using CARDfree
+set.seed(seed = 20200107)
 CARDfree_obj <- CARD_refFree(CARDfree_obj)
 ```
 
@@ -499,6 +501,7 @@ the procedure.
 ```{r}
 #### Note that here the shapeSpot is the user defined variable which
 #### indicates the capturing area of single cells. Details see above.
+set.seed(seed = 20210107)
 scMapping <- CARD_SCMapping(CARD_obj, shapeSpot = "Square", numCell = 20, 
                             ncore = 2)
 print(scMapping)

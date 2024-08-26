@@ -5,13 +5,11 @@
 \title{Extension of CARD into a reference-free version of
 deconvolution: CARDfree.}
 \usage{
-CARD_refFree(CARDfree_object, iseed = 20200107)
+CARD_refFree(CARDfree_object)
 }
 \arguments{
 \item{CARDfree_object}{CARDfree object create by the createCARDfreeObject
 function.}
-
-\item{iseed}{Seed for initialization}
 }
 \value{
 Returns a CARD object with estimated cell type proportion stored in

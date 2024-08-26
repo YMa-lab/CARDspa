@@ -5,7 +5,7 @@
 \title{The function to sample the spatial location information for each single
 cell}
 \usage{
-getHighresCords(Cords, numCell, shape = "Square", iseed = 20210107)
+getHighresCords(Cords, numCell, shape = "Square")
 }
 \arguments{
 \item{Cords}{The spatial location information in the measure spatial
@@ -21,8 +21,6 @@ for single cells locating in a Square-like region or a Circle-like region.
 The center of this region is the measured spatial location in the non-single
 cell resolution spatial transcriptomics data. The default is 'Square', the
 other shape is 'Circle'}
-
-\item{iseed}{Seed for initialization}
 }
 \value{
 Returns a dataframe with the sampled spatial location information
