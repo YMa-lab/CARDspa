@@ -9,7 +9,8 @@ createCARDfreeObject(
   spatial_count,
   spatial_location,
   minCountGene = 100,
-  minCountSpot = 5
+  minCountSpot = 5,
+  spe = NULL
 )
 }
 \arguments{
@@ -26,6 +27,9 @@ should match eaxctly with the columns of the spatial_count.}
 \item{minCountGene}{Minimum counts for each gene}
 
 \item{minCountSpot}{Minimum counts for each spatial location}
+
+\item{spe}{a \code{SpatialExperiment} object containing spatial data in
+the \code{counts} assay, and spatial coordinates in the spatialCoords.}
 }
 \value{
 Returns CARDfree object with filtered spatial count and marker gene
@@ -43,7 +47,8 @@ CARDfree_obj <- createCARDfreeObject(
     spatial_count = spatial_count,
     spatial_location = spatial_location,
     minCountGene = 100,
-    minCountSpot = 5
+    minCountSpot = 5,
+    spe = NULL
 )
 
 }

@@ -64,6 +64,7 @@ library(RcppML)
 library(NMF)
 library(RcppArmadillo)
 library(SingleCellExperiment)
+library(SpatialExperiment)
 library(ggplot2)
 #### load the example spatial transcriptomics count data,
 data(spatial_count)
@@ -162,9 +163,37 @@ CARD_obj <- createCARDObject(
 ## QC on spatially-resolved dataset! ..
 ```
 
+And `CARDspa` also supports using SingleCellExperiment object and SingleCellExperiment object, you can run the following code:
+
+```{r}
+## create sce object
+sce <- SingleCellExperiment(assay = list(counts = sc_count),
+                            colData = sc_meta)
+## create spe object
+spe <- SpatialExperiment(assay = list(counts = spatial_count),
+                         spatialCoords  = as.matrix(spatial_location)
+                         )
+celltypes <- unique(sc_meta$cellType)
+    
+CARD_obj <- createCARDObject(
+    spe = spe,
+    sce = sce,
+    sc_count = NULL,
+    sc_meta = NULL,
+    spatial_count = NULL,
+    spatial_location = NULL,
+    ct.varname = "cellType",
+    ct.select = celltypes,
+    sample.varname = "sampleInfo",
+    minCountGene = 100,
+    minCountSpot = 5
+)
+```
+
 The spatial data are stored in `CARD_obj@spatial_countMat` and 
 `CARD_obj@spatial_location` while the scRNA-seq data is stored in 
 CARD_obj@sc_eset in the format of SingleCellExperiment. 
+
 
 ### 2. Deconvolution using CARD
 Now we have evrything stored in the CARD object, we can use CARD to deconvolute 
@@ -423,6 +452,19 @@ CARDfree_obj <- createCARDfreeObject(
     markerList = markerList,
     spatial_count = spatial_count,
     spatial_location = spatial_location,
+    minCountGene = 100,
+    minCountSpot = 5
+)
+```
+
+Similarly, you can use SpatialExperiment object.
+
+```{r}
+CARDfree_obj <- createCARDfreeObject(
+    markerList = markerList,
+    spatial_count = NULL,
+    spatial_location = NULL,
+    spe = spe,
     minCountGene = 100,
     minCountSpot = 5
 )

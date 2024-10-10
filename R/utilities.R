@@ -35,6 +35,7 @@ setClass("CARD",
     )
 )
 
+
 #' Quality control of scRNA-seq count data
 #'
 #' @param counts_in Raw scRNAseq count data, each column is a cell and each
@@ -99,6 +100,11 @@ sc_QC <- function(counts_in, metaData, ct.varname, ct.select,
 #' @param spatial_location data frame, with two columns representing the x and
 #' y coordinates of the spatial location. The rownames of this data frame
 #' should match eaxctly with the columns of the spatial_count.
+#' @param sce a \code{SingleCellExperiment} object containing scRNA-seq count 
+#' data in the \code{counts} assay, and cell types and sample information in 
+#' the colData.
+#' @param spe a \code{SpatialExperiment} object containing spatial data in 
+#' the \code{counts} assay, and spatial coordinates in the spatialCoords.
 #' @param ct.varname character, the name of the column in metaData that
 #' specifies the cell type annotation information
 #' @param ct.select vector of cell type names that you are interested in to
@@ -112,6 +118,8 @@ sc_QC <- function(counts_in, metaData, ct.varname, ct.select,
 #'
 #' @importFrom SummarizedExperiment assays
 #' @import methods
+#' @import SingleCellExperiment
+#' @import SpatialExperiment
 #' @return Returns CARD object with filtered spatial count and single cell
 #' RNA-seq dataset.
 #'
@@ -130,12 +138,27 @@ sc_QC <- function(counts_in, metaData, ct.varname, ct.select,
 #'     ct.select = unique(sc_meta$cellType),
 #'     sample.varname = "sampleInfo",
 #'     minCountGene = 100,
-#'     minCountSpot = 5
+#'     minCountSpot = 5,
+#'     sce = NULL,
+#'     spe = NULL
 #' )
 #'
 createCARDObject <- function(sc_count, sc_meta, spatial_count, spatial_location,
                             ct.varname, ct.select, sample.varname,
-                            minCountGene = 100, minCountSpot = 5) {
+                            minCountGene = 100, minCountSpot = 5,
+                            sce = NULL, spe = NULL) {
+    if(is.null(sc_count) || is.null(sc_meta) 
+       || is.null(spatial_count) || is.null(spatial_location)){
+        if(!is.null(sce) && !is.null(spe)){
+            sc_count <- assays(sce)[['counts']]
+            sc_meta <- as.data.frame(sce@colData)
+            spatial_count <- assays(spe)[['counts']]
+            spatial_location <- as.data.frame(spatialCoords(spe))
+        } else{
+            stop("Please provide SingleCellExperiment object and 
+            SpatialExperiment object")
+        }
+    }
     #### QC on scRNASeq dataset
     message("## QC on scRNASeq dataset! ...\n")
     if (is(sc_count, "matrix")) {
@@ -289,6 +312,8 @@ setClass("CARDfree",
         refined_expression = "matrix"
     )
 )
+
+
 #' Create the CARD object
 #'
 #' @param markerList a list of marker genes, with each element of the list
@@ -298,10 +323,13 @@ setClass("CARDfree",
 #' @param spatial_location data frame, with two columns representing the x and
 #' y coordinates of the spatial location. The rownames of this data frame
 #' should match eaxctly with the columns of the spatial_count.
+#' @param spe a \code{SpatialExperiment} object containing spatial data in 
+#' the \code{counts} assay, and spatial coordinates in the spatialCoords.
 #' @param minCountGene Minimum counts for each gene
 #' @param minCountSpot Minimum counts for each spatial location
 #'
 #' @import methods
+#' @import SpatialExperiment
 #' @return Returns CARDfree object with filtered spatial count and marker gene
 #' list.
 #'
@@ -315,11 +343,23 @@ setClass("CARDfree",
 #'     spatial_count = spatial_count,
 #'     spatial_location = spatial_location,
 #'     minCountGene = 100,
-#'     minCountSpot = 5
+#'     minCountSpot = 5,
+#'     spe = NULL
 #' )
 #'
 createCARDfreeObject <- function(markerList, spatial_count, spatial_location,
-                                minCountGene = 100, minCountSpot = 5) {
+                                minCountGene = 100, minCountSpot = 5,
+                                spe = NULL) {
+    if(is.null(spatial_count) || is.null(spatial_location)){
+        if(!is.null(spe)){
+            spatial_count <- assays(spe)[['counts']]
+            spatial_location <- as.data.frame(spatialCoords(spe))
+        }else{
+            stop("Please provide SpatialExperiment object")
+        }
+    }
+    
+    
     if (is(spatial_count, "matrix")) {
         spatial_countMat <- as(as.matrix(spatial_count), "sparseMatrix")
     } else if (is(spatial_count, "vector")) {
@@ -376,3 +416,81 @@ createCARDfreeObject <- function(markerList, spatial_count, spatial_location,
     )
     return(object)
 }
+
+
+#' Show method for the CARD class
+#'
+#' This method provides a concise summary of an object of class \code{CARD}, 
+#' displaying key information including the project name, the number of spots,
+#' the number of cell types, and a sample of the 
+#' \code{Proportion_CARD} matrix.
+#'
+#' @param object An object of class \code{CARD}.
+#' 
+#' @return A concise summary of the \code{CARD} object is printed to the console.
+#' 
+#' @examples
+#' data(spatial_count)
+#' data(spatial_location)
+#' data(sc_count)
+#' data(sc_meta)
+#' CARD_obj <- createCARDObject(
+#'     sc_count = sc_count,
+#'     sc_meta = sc_meta,
+#'     spatial_count = spatial_count,
+#'     spatial_location = spatial_location,
+#'     ct.varname = "cellType",
+#'     ct.select = unique(sc_meta$cellType),
+#'     sample.varname = "sampleInfo",
+#'     minCountGene = 100,
+#'     minCountSpot = 5,
+#'     sce = NULL,
+#'     spe = NULL
+#' )
+#' show(CARD_obj)
+#' 
+#' @export
+
+setMethod("show", "CARD", function(object) {
+    cat("An object of class 'CARD'\n")
+    cat("\nProject: ", object@project, "\n")
+    cat("Number of spots: ", dim(object@spatial_countMat)[2], "\n")
+    cat("Number of cell types: ", length(unique(object@sc_eset$cellType)), "\n")
+})
+
+
+
+#' Show method for the CARDfree class
+#'
+#' This method provides a concise summary of an object of class \code{CARDfree}, 
+#' displaying key information including the project name, the number of spots,
+#' the number of cell types, and a sample of the 
+#' \code{Proportion_CARD} matrix.
+#'
+#' @param object An object of class \code{CARDfree}.
+#' 
+#' @return A concise summary of the \code{CARDfree} object is 
+#' printed to the console.
+#' 
+#' @examples
+#' data(markerList)
+#' data(spatial_count)
+#' data(spatial_location)
+#' CARDfree_obj <- createCARDfreeObject(
+#'     markerList = markerList,
+#'     spatial_count = spatial_count,
+#'     spatial_location = spatial_location,
+#'     minCountGene = 100,
+#'     minCountSpot = 5,
+#'     spe = NULL
+#' )
+#' show(CARDfree_obj)
+#' 
+#' @export
+
+setMethod("show", "CARDfree", function(object) {
+    cat("An object of class 'CARDfree'\n")
+    cat("\nProject: ", object@project, "\n")
+    cat("Number of spots: ", dim(object@spatial_countMat)[2], "\n")
+})
+

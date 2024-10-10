@@ -13,7 +13,9 @@ createCARDObject(
   ct.select,
   sample.varname,
   minCountGene = 100,
-  minCountSpot = 5
+  minCountSpot = 5,
+  sce = NULL,
+  spe = NULL
 )
 }
 \arguments{
@@ -45,6 +47,13 @@ sample.}
 \item{minCountGene}{Minimum counts for each gene}
 
 \item{minCountSpot}{Minimum counts for each spatial location}
+
+\item{sce}{a \code{SingleCellExperiment} object containing scRNA-seq count
+data in the \code{counts} assay, and cell types and sample information in
+the colData.}
+
+\item{spe}{a \code{SpatialExperiment} object containing spatial data in
+the \code{counts} assay, and spatial coordinates in the spatialCoords.}
 }
 \value{
 Returns CARD object with filtered spatial count and single cell
@@ -67,7 +76,9 @@ CARD_obj <- createCARDObject(
     ct.select = unique(sc_meta$cellType),
     sample.varname = "sampleInfo",
     minCountGene = 100,
-    minCountSpot = 5
+    minCountSpot = 5,
+    sce = NULL,
+    spe = NULL
 )
 
 }
