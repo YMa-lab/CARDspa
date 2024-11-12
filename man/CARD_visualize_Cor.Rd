@@ -25,17 +25,16 @@ data(spatial_count)
 data(spatial_location)
 data(sc_count)
 data(sc_meta)
-CARD_obj <- createCARDObject(
+CARD_obj <- CARD_deconvolution(
     sc_count = sc_count,
     sc_meta = sc_meta,
     spatial_count = spatial_count,
     spatial_location = spatial_location,
-    ct.varname = "cellType",
-    ct.select = unique(sc_meta$cellType),
-    sample.varname = "sampleInfo",
-    minCountGene = 100,
-    minCountSpot = 5
+    ct_varname = "cellType",
+    ct_select = unique(sc_meta$cellType),
+    sample_varname = "sampleInfo",
+    mincountgene = 100,
+    mincountspot = 5
 )
-CARD_obj <- CARD_deconvolution(CARD_object = CARD_obj)
-CARD_visualize_Cor(slot(CARD_obj, "Proportion_CARD"), colors = NULL)
+CARD_visualize_Cor(CARD_obj$Proportion_CARD, colors = NULL)
 }

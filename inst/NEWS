@@ -1,7 +1,7 @@
 \name{NEWS}
 \title{News for Package CARDspa}
 
-\section{Version 0.99.2 (2024-10-10)}{
+\section{Version 0.99.3 (2024-10-20)}{
  \itemize{
   \item Package prepared for Bioconductor submission
  }

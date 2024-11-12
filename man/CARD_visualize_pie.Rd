@@ -28,22 +28,22 @@ scatterpie plot
 }
 \examples{
 library(ggplot2)
+library(SpatialExperiment)
 data(spatial_count)
 data(spatial_location)
 data(sc_count)
 data(sc_meta)
-CARD_obj <- createCARDObject(
+CARD_obj <- CARD_deconvolution(
     sc_count = sc_count,
     sc_meta = sc_meta,
     spatial_count = spatial_count,
     spatial_location = spatial_location,
-    ct.varname = "cellType",
-    ct.select = unique(sc_meta$cellType),
-    sample.varname = "sampleInfo",
-    minCountGene = 100,
-    minCountSpot = 5
+    ct_varname = "cellType",
+    ct_select = unique(sc_meta$cellType),
+    sample_varname = "sampleInfo",
+    mincountgene = 100,
+    mincountspot = 5
 )
-CARD_obj <- CARD_deconvolution(CARD_object = CARD_obj)
 colors <- c(
     "#FFD92F", "#4DAF4A", "#FCCDE5", "#D9D9D9", "#377EB8", "#7FC97F",
     "#BEAED4", "#FDC086", "#FFFF99", "#386CB0", "#F0027F", "#BF5B17", 
@@ -51,8 +51,8 @@ colors <- c(
     "#E6AB02", "#A6761D"
 )
 CARD_visualize_pie(
-    proportion = slot(CARD_obj, "Proportion_CARD"),
-    spatial_location = slot(CARD_obj, "spatial_location"),
+    proportion = CARD_obj$Proportion_CARD,
+    spatial_location = spatialCoords(CARD_obj),
     colors = colors,
     radius = 0.52
 )

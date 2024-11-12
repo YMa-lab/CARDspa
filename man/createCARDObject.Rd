@@ -9,11 +9,11 @@ createCARDObject(
   sc_meta,
   spatial_count,
   spatial_location,
-  ct.varname,
-  ct.select,
-  sample.varname,
-  minCountGene = 100,
-  minCountSpot = 5,
+  ct_varname,
+  ct_select,
+  sample_varname,
+  mincountgene = 100,
+  mincountspot = 5,
   sce = NULL,
   spe = NULL
 )
@@ -33,20 +33,20 @@ is a spatial location, and each row is a gene.}
 y coordinates of the spatial location. The rownames of this data frame
 should match eaxctly with the columns of the spatial_count.}
 
-\item{ct.varname}{character, the name of the column in metaData that
+\item{ct_varname}{character, the name of the column in metadata that
 specifies the cell type annotation information}
 
-\item{ct.select}{vector of cell type names that you are interested in to
+\item{ct_select}{vector of cell type names that you are interested in to
 deconvolute, default as NULL. If NULL, then use all cell types provided by
 single cell dataset;}
 
-\item{sample.varname}{character,the name of the column in metaData that
+\item{sample_varname}{character,the name of the column in metadata that
 specifies the sample information. If NULL, we just use the whole as one
 sample.}
 
-\item{minCountGene}{Minimum counts for each gene}
+\item{mincountgene}{Minimum counts for each gene}
 
-\item{minCountSpot}{Minimum counts for each spatial location}
+\item{mincountspot}{Minimum counts for each spatial location}
 
 \item{sce}{a \code{SingleCellExperiment} object containing scRNA-seq count
 data in the \code{counts} assay, and cell types and sample information in
@@ -61,24 +61,4 @@ RNA-seq dataset.
 }
 \description{
 Create the CARD object
-}
-\examples{
-data(spatial_count)
-data(spatial_location)
-data(sc_count)
-data(sc_meta)
-CARD_obj <- createCARDObject(
-    sc_count = sc_count,
-    sc_meta = sc_meta,
-    spatial_count = spatial_count,
-    spatial_location = spatial_location,
-    ct.varname = "cellType",
-    ct.select = unique(sc_meta$cellType),
-    sample.varname = "sampleInfo",
-    minCountGene = 100,
-    minCountSpot = 5,
-    sce = NULL,
-    spe = NULL
-)
-
 }

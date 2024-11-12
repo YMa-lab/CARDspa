@@ -5,14 +5,60 @@
 \title{Spatially Informed Cell Type Deconvolution for Spatial Transcriptomics
 by CARD}
 \usage{
-CARD_deconvolution(CARD_object)
+CARD_deconvolution(
+  sc_count,
+  sc_meta,
+  spatial_count,
+  spatial_location,
+  ct_varname,
+  ct_select,
+  sample_varname,
+  mincountgene = 100,
+  mincountspot = 5,
+  sce = NULL,
+  spe = NULL
+)
 }
 \arguments{
-\item{CARD_object}{CARD object create by the createCARDObject function}
+\item{sc_count}{Raw scRNA-seq count data, each column is a cell and each row
+is a gene.}
+
+\item{sc_meta}{data frame, with each row representing the cell type and/or
+sample information of a specific cell. The row names of this data frame
+should match exactly with the column names of the sc_count data}
+
+\item{spatial_count}{Raw spatial resolved transcriptomics data, each column
+is a spatial location, and each row is a gene.}
+
+\item{spatial_location}{data frame, with two columns representing the x and
+y coordinates of the spatial location. The rownames of this data frame
+should match eaxctly with the columns of the spatial_count.}
+
+\item{ct_varname}{character, the name of the column in metaData that
+specifies the cell type annotation information}
+
+\item{ct_select}{vector of cell type names that you are interested in to
+deconvolute, default as NULL. If NULL, then use all cell types provided by
+single cell dataset;}
+
+\item{sample_varname}{character,the name of the column in metaData that
+specifies the sample information. If NULL, we just use the whole as one
+sample.}
+
+\item{mincountgene}{Minimum counts for each gene}
+
+\item{mincountspot}{Minimum counts for each spatial location}
+
+\item{sce}{a \code{SingleCellExperiment} object containing scRNA-seq count
+data in the \code{counts} assay, and cell types and sample information in
+the colData.}
+
+\item{spe}{a \code{SpatialExperiment} object containing spatial data in
+the \code{counts} assay, and spatial coordinates in the spatialCoords.}
 }
 \value{
-Returns a CARD object with estimated cell type proportion stored
-in object@Proportion_CARD.
+Returns a SpatialExperiment object with estimated cell type
+proportion stored in object$Proportion_CARD.
 }
 \description{
 Spatially Informed Cell Type Deconvolution for Spatial Transcriptomics
@@ -26,16 +72,15 @@ data(spatial_count)
 data(spatial_location)
 data(sc_count)
 data(sc_meta)
-CARD_obj <- createCARDObject(
+CARD_obj <- CARD_deconvolution(
     sc_count = sc_count,
     sc_meta = sc_meta,
     spatial_count = spatial_count,
     spatial_location = spatial_location,
-    ct.varname = "cellType",
-    ct.select = unique(sc_meta$cellType),
-    sample.varname = "sampleInfo",
-    minCountGene = 100,
-    minCountSpot = 5
+    ct_varname = "cellType",
+    ct_select = unique(sc_meta$cellType),
+    sample_varname = "sampleInfo",
+    mincountgene = 100,
+    mincountspot = 5
 )
-CARD_obj <- CARD_deconvolution(CARD_object = CARD_obj)
 }

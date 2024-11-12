@@ -7,7 +7,7 @@
 CARD_visualize_gene(
   spatial_expression,
   spatial_location,
-  gene.visualize,
+  gene_visualize,
   colors = colors,
   NumCols
 )
@@ -18,7 +18,7 @@ original resolution or enhanced resolution.}
 
 \item{spatial_location}{Data frame, spatial location information.}
 
-\item{gene.visualize}{Vector of selected gene names that are interested to
+\item{gene_visualize}{Vector of selected gene names that are interested to
 visualize}
 
 \item{colors}{Vector of color names that you want to use, if NULL, we will
@@ -35,28 +35,29 @@ Visualize the spatial distribution of cell type proportion
 }
 \examples{
 library(ggplot2)
+library(SummarizedExperiment)
+library(SpatialExperiment)
 data(spatial_count)
 data(spatial_location)
 data(sc_count)
 data(sc_meta)
-CARD_obj <- createCARDObject(
+CARD_obj <- CARD_deconvolution(
     sc_count = sc_count,
     sc_meta = sc_meta,
     spatial_count = spatial_count,
     spatial_location = spatial_location,
-    ct.varname = "cellType",
-    ct.select = unique(sc_meta$cellType),
-    sample.varname = "sampleInfo",
-    minCountGene = 100,
-    minCountSpot = 5
+    ct_varname = "cellType",
+    ct_select = unique(sc_meta$cellType),
+    sample_varname = "sampleInfo",
+    mincountgene = 100,
+    mincountspot = 5
 )
-CARD_obj <- CARD_deconvolution(CARD_object = CARD_obj)
 CARD_visualize_gene(
-    spatial_expression = slot(CARD_obj, "spatial_countMat"),
-    spatial_location = slot(CARD_obj, "spatial_location"),
-    gene.visualize = c("A4GNT", "AAMDC", "CD248"),
+    spatial_expression = assays(CARD_obj)$spatial_countMat,
+    spatial_location = spatialCoords(CARD_obj),
+    gene_visualize = c("A4GNT", "AAMDC", "CD248"),
     colors = NULL,
-    NumCols = 6
+    NumCols = 3
 )
 
 }

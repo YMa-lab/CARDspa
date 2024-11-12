@@ -5,16 +5,16 @@
 \title{Create the CARD object}
 \usage{
 createCARDfreeObject(
-  markerList,
+  markerlist,
   spatial_count,
   spatial_location,
-  minCountGene = 100,
-  minCountSpot = 5,
+  mincountgene = 100,
+  mincountspot = 5,
   spe = NULL
 )
 }
 \arguments{
-\item{markerList}{a list of marker genes, with each element of the list
+\item{markerlist}{a list of marker genes, with each element of the list
 being the vector of cell type specific marker genes}
 
 \item{spatial_count}{Raw spatial resolved transcriptomics data, each column
@@ -24,9 +24,9 @@ is a spatial location, and each row is a gene.}
 y coordinates of the spatial location. The rownames of this data frame
 should match eaxctly with the columns of the spatial_count.}
 
-\item{minCountGene}{Minimum counts for each gene}
+\item{mincountgene}{Minimum counts for each gene}
 
-\item{minCountSpot}{Minimum counts for each spatial location}
+\item{mincountspot}{Minimum counts for each spatial location}
 
 \item{spe}{a \code{SpatialExperiment} object containing spatial data in
 the \code{counts} assay, and spatial coordinates in the spatialCoords.}
@@ -37,18 +37,4 @@ list.
 }
 \description{
 Create the CARD object
-}
-\examples{
-data(markerList)
-data(spatial_count)
-data(spatial_location)
-CARDfree_obj <- createCARDfreeObject(
-    markerList = markerList,
-    spatial_count = spatial_count,
-    spatial_location = spatial_location,
-    minCountGene = 100,
-    minCountSpot = 5,
-    spe = NULL
-)
-
 }

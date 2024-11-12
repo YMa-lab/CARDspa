@@ -8,7 +8,7 @@ the same plot}
 CARD_visualize_prop_2CT(
   proportion,
   spatial_location,
-  ct2.visualize = ct2.visualize,
+  ct2_visualize = ct2_visualize,
   colors = NULL
 )
 }
@@ -18,7 +18,7 @@ either original resolution or enhanced resolution.}
 
 \item{spatial_location}{Data frame, spatial location information.}
 
-\item{ct2.visualize}{Vector of selected two cell type names that are
+\item{ct2_visualize}{Vector of selected two cell type names that are
 interested to visualize, here we only focus on two cell types}
 
 \item{colors}{list of color names that you want to use for each cell type,
@@ -34,26 +34,26 @@ the same plot
 }
 \examples{
 library(ggplot2)
+library(SpatialExperiment)
 data(spatial_count)
 data(spatial_location)
 data(sc_count)
 data(sc_meta)
-CARD_obj <- createCARDObject(
+CARD_obj <- CARD_deconvolution(
     sc_count = sc_count,
     sc_meta = sc_meta,
     spatial_count = spatial_count,
     spatial_location = spatial_location,
-    ct.varname = "cellType",
-    ct.select = unique(sc_meta$cellType),
-    sample.varname = "sampleInfo",
-    minCountGene = 100,
-    minCountSpot = 5
+    ct_varname = "cellType",
+    ct_select = unique(sc_meta$cellType),
+    sample_varname = "sampleInfo",
+    mincountgene = 100,
+    mincountspot = 5
 )
-CARD_obj <- CARD_deconvolution(CARD_object = CARD_obj)
 CARD_visualize_prop_2CT(
-    proportion = slot(CARD_obj, "Proportion_CARD"),
-    spatial_location = slot(CARD_obj, "spatial_location"),
-    ct2.visualize = c("Cancer_clone_A", "Cancer_clone_B"),
+    proportion = CARD_obj$Proportion_CARD,
+    spatial_location = spatialCoords(CARD_obj),
+    ct2_visualize = c("Cancer_clone_A", "Cancer_clone_B"),
     colors = list(c("lightblue", "lightyellow", "red"), c(
         "lightblue", "lightyellow",
         "black"

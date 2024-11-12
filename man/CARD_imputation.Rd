@@ -5,13 +5,14 @@
 \title{Construct an enhanced spatial expression map on the unmeasured tissue
 locations}
 \usage{
-CARD_imputation(CARD_object, NumGrids, ineibor = 10, exclude = NULL)
+CARD_imputation(CARD_object, num_grids, ineibor = 10, exclude = NULL)
 }
 \arguments{
-\item{CARD_object}{CARD Object with estimated cell type compositions on the
+\item{CARD_object}{SpatialExperiment Object created by
+CARD_deconvolution with estimated cell type compositions on the
 original spatial resolved transcriptomics data.}
 
-\item{NumGrids}{Initial number of newly grided spatial locations. The final
+\item{num_grids}{Initial number of newly grided spatial locations. The final
 number of newly grided spatial locations will be lower than this value since
 the newly grided locations outside the shape of the tissue will be filtered}
 
@@ -23,9 +24,9 @@ resolution that you want to exclude. This is to avoid the weird detection of
 the shape.}
 }
 \value{
-Return CARD object with the refined cell type compositions estimated
-for newly grided spots and the refined predicted gene expression
-(normalized).
+Return a SpatialExperiment object with the refined cell type
+compositions estimated for newly grided spots and the refined predicted
+gene expression (normalized).
 }
 \description{
 Construct an enhanced spatial expression map on the unmeasured tissue
@@ -36,21 +37,20 @@ data(spatial_count)
 data(spatial_location)
 data(sc_count)
 data(sc_meta)
-CARD_obj <- createCARDObject(
+CARD_obj <- CARD_deconvolution(
     sc_count = sc_count,
     sc_meta = sc_meta,
     spatial_count = spatial_count,
     spatial_location = spatial_location,
-    ct.varname = "cellType",
-    ct.select = unique(sc_meta$cellType),
-    sample.varname = "sampleInfo",
-    minCountGene = 100,
-    minCountSpot = 5
+    ct_varname = "cellType",
+    ct_select = unique(sc_meta$cellType),
+    sample_varname = "sampleInfo",
+    mincountgene = 100,
+    mincountspot = 5
 )
-CARD_obj <- CARD_deconvolution(CARD_object = CARD_obj)
 CARD_obj <- CARD_imputation(
     CARD_obj,
-    NumGrids = 200,
+    num_grids = 200,
     ineibor = 10,
     exclude = NULL
 )

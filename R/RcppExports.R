@@ -14,8 +14,29 @@
 #' @param initLambda Initial vector of cell type sepcific scalar.
 #'
 #' @return A list
-CARDfree <- function(XinputIn, UIn, WIn, phiIn, max_iterIn, epsilonIn, initV, initb, initSigma_e2, initLambda) {
-    .Call('_CARDspa_CARDfree', PACKAGE = 'CARDspa', XinputIn, UIn, WIn, phiIn, max_iterIn, epsilonIn, initV, initb, initSigma_e2, initLambda)
+CARDfree <- function(
+        XinputIn, 
+        UIn, 
+        WIn, 
+        phiIn, 
+        max_iterIn, 
+        epsilonIn, 
+        initV, 
+        initb, 
+        initSigma_e2, 
+        initLambda) {
+    .Call('_CARDspa_CARDfree', 
+          PACKAGE = 'CARDspa', 
+          XinputIn, 
+          UIn, 
+          WIn, 
+          phiIn, 
+          max_iterIn, 
+          epsilonIn, 
+          initV, 
+          initb, 
+          initSigma_e2, 
+          initLambda)
 }
 
 #' SpatialDeconv function based on Conditional Autoregressive model
@@ -31,7 +52,28 @@ CARDfree <- function(XinputIn, UIn, WIn, phiIn, max_iterIn, epsilonIn, initV, in
 #' @param initLambda Initial vector of cell type sepcific scalar.
 #'
 #' @return A list
-CARDref <- function(XinputIn, UIn, WIn, phiIn, max_iterIn, epsilonIn, initV, initb, initSigma_e2, initLambda) {
-    .Call('_CARDspa_CARDref', PACKAGE = 'CARDspa', XinputIn, UIn, WIn, phiIn, max_iterIn, epsilonIn, initV, initb, initSigma_e2, initLambda)
+CARDref <- function(
+        XinputIn, 
+        UIn, 
+        WIn, 
+        phiIn, 
+        max_iterIn, 
+        epsilonIn, 
+        initV, 
+        initb, 
+        initSigma_e2, 
+        initLambda) {
+    .Call('_CARDspa_CARDref', 
+          PACKAGE = 'CARDspa', 
+          XinputIn, 
+          UIn, 
+          WIn, 
+          phiIn, 
+          max_iterIn, 
+          epsilonIn, 
+          initV, 
+          initb, 
+          initSigma_e2, 
+          initLambda)
 }
 

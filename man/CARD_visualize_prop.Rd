@@ -7,7 +7,7 @@
 CARD_visualize_prop(
   proportion,
   spatial_location,
-  ct.visualize = ct.visualize,
+  ct_visualize = ct_visualize,
   colors = c("lightblue", "lightyellow", "red"),
   NumCols,
   pointSize = 3
@@ -19,7 +19,7 @@ either original resolution or enhanced resolution.}
 
 \item{spatial_location}{Data frame, spatial location information.}
 
-\item{ct.visualize}{Vector of selected cell type names that are
+\item{ct_visualize}{Vector of selected cell type names that are
 interested to visualize}
 
 \item{colors}{Vector of color names that you want to use, if NULL, we will
@@ -38,31 +38,31 @@ Visualize the spatial distribution of cell type proportion
 }
 \examples{
 library(ggplot2)
+library(SpatialExperiment)
 data(spatial_count)
 data(spatial_location)
 data(sc_count)
 data(sc_meta)
-CARD_obj <- createCARDObject(
+CARD_obj <- CARD_deconvolution(
     sc_count = sc_count,
     sc_meta = sc_meta,
     spatial_count = spatial_count,
     spatial_location = spatial_location,
-    ct.varname = "cellType",
-    ct.select = unique(sc_meta$cellType),
-    sample.varname = "sampleInfo",
-    minCountGene = 100,
-    minCountSpot = 5
+    ct_varname = "cellType",
+    ct_select = unique(sc_meta$cellType),
+    sample_varname = "sampleInfo",
+    mincountgene = 100,
+    mincountspot = 5
 )
-CARD_obj <- CARD_deconvolution(CARD_object = CARD_obj)
-ct.visualize <- c(
+ct_visualize <- c(
     "Acinar_cells", "Cancer_clone_A", "Cancer_clone_B",
     "Ductal_terminal_ductal_like", "Ductal_CRISP3_high-centroacinar_like",
     "Ductal_MHC_Class_II", "Ductal_APOL1_high-hypoxic", "Fibroblasts"
 )
 CARD_visualize_prop(
-    proportion = slot(CARD_obj, "Proportion_CARD"),
-    spatial_location = slot(CARD_obj, "spatial_location"),
-    ct.visualize = ct.visualize,
+    proportion = CARD_obj$Proportion_CARD,
+    spatial_location = spatialCoords(CARD_obj),
+    ct_visualize = ct_visualize,
     colors = c("lightblue", "lightyellow", "red"),
     NumCols = 4,
     pointSize = 3.0

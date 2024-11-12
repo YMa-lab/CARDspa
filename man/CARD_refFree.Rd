@@ -5,16 +5,38 @@
 \title{Extension of CARD into a reference-free version of
 deconvolution: CARDfree.}
 \usage{
-CARD_refFree(CARDfree_object)
+CARD_refFree(
+  markerlist,
+  spatial_count,
+  spatial_location,
+  mincountgene = 100,
+  mincountspot = 5,
+  spe = NULL
+)
 }
 \arguments{
-\item{CARDfree_object}{CARDfree object create by the createCARDfreeObject
-function.}
+\item{markerlist}{a list of marker genes, with each element of the list
+being the vector of cell type specific marker genes}
+
+\item{spatial_count}{Raw spatial resolved transcriptomics data, each column
+is a spatial location, and each row is a gene.}
+
+\item{spatial_location}{data frame, with two columns representing the x and
+y coordinates of the spatial location. The rownames of this data frame
+should match eaxctly with the columns of the spatial_count.}
+
+\item{mincountgene}{Minimum counts for each gene}
+
+\item{mincountspot}{Minimum counts for each spatial location}
+
+\item{spe}{a \code{SpatialExperiment} object containing spatial data in
+the \code{counts} assay, and spatial coordinates in the spatialCoords.}
 }
 \value{
-Returns a CARD object with estimated cell type proportion stored in
-object@Proportion_CARD. Because this is a reference-free version, the
-columns of estimated proportion is not cell type but cell type cluster
+Returns a SpatialExperiment object with estimated cell type
+proportion stored in object$Proportion_CARD. Because this is a
+reference-free version, the columns of estimated proportion is not cell
+type but cell type cluster
 }
 \description{
 Extension of CARD into a reference-free version of
@@ -27,13 +49,12 @@ library(RcppArmadillo)
 data(markerList)
 data(spatial_count)
 data(spatial_location)
-CARDfree_obj <- createCARDfreeObject(
-    markerList = markerList,
+CARDfree_obj <- CARD_refFree(
+    markerlist = markerList,
     spatial_count = spatial_count[1:7500, ],
     spatial_location = spatial_location,
-    minCountGene = 100,
-    minCountSpot = 5
+    mincountgene = 100,
+    mincountspot = 5
 )
-CARDfree_obj <- CARD_refFree(CARDfree_obj)
 
 }

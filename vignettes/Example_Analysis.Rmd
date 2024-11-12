@@ -114,10 +114,9 @@ each cell type containing at least 2 cells. i.e.
 print(table(sc_meta$cellType,useNA = "ifany"))
 
 ## Cell Type Deconvolution
-
-### 1. Create an `CARD` object
-The CARD object is created by the function `createCARDObject`. The essential 
-inputs are:
+### 1. Deconvolution using CARD
+We can use `CARD_deconvolution` to deconvolute the spatial transcriptomics
+data. The essential inputs are:
 - sc_count: Matrix or sparse matrix of raw scRNA-seq count data, each row 
 represents a gene and each column represents a cell. This sc_count data 
 serves as a reference for the cell type deconvolution for spatial 
@@ -147,57 +146,12 @@ number of counts detected. Default is 100.
 - minCountSpot: Numeric, include genes where at least this number of spatial
 locations that have non-zero expression. Default is 5.
 
-```{r}
-CARD_obj <- createCARDObject(
-    sc_count = sc_count,
-    sc_meta = sc_meta,
-    spatial_count = spatial_count,
-    spatial_location = spatial_location,
-    ct.varname = "cellType",
-    ct.select = unique(sc_meta$cellType),
-    sample.varname = "sampleInfo",
-    minCountGene = 100,
-    minCountSpot = 5
-)
-## QC on scRNASeq dataset! ...
-## QC on spatially-resolved dataset! ..
-```
-
-And `CARDspa` also supports using SingleCellExperiment object and SingleCellExperiment object, you can run the following code:
-
-```{r}
-## create sce object
-sce <- SingleCellExperiment(assay = list(counts = sc_count),
-                            colData = sc_meta)
-## create spe object
-spe <- SpatialExperiment(assay = list(counts = spatial_count),
-                         spatialCoords  = as.matrix(spatial_location)
-                         )
-celltypes <- unique(sc_meta$cellType)
-    
-CARD_obj <- createCARDObject(
-    spe = spe,
-    sce = sce,
-    sc_count = NULL,
-    sc_meta = NULL,
-    spatial_count = NULL,
-    spatial_location = NULL,
-    ct.varname = "cellType",
-    ct.select = celltypes,
-    sample.varname = "sampleInfo",
-    minCountGene = 100,
-    minCountSpot = 5
-)
-```
-
-The spatial data are stored in `CARD_obj@spatial_countMat` and 
-`CARD_obj@spatial_location` while the scRNA-seq data is stored in 
-CARD_obj@sc_eset in the format of SingleCellExperiment. 
+This function first create a CARD object and then do deconvolution. Finally 
+return a SpatialExperiment object. The results are stored in 
+`CARD_obj$Proportion_CARD`
 
 
-### 2. Deconvolution using CARD
-Now we have evrything stored in the CARD object, we can use CARD to deconvolute 
-the spatial transcriptomics data. CARD is computationally fast and memory 
+CARD is computationally fast and memory 
 efficient. CARD relies on an efficient optimization algorithm for constrained 
 maximum likelihood estimation and is scalable to spatial transcriptomics with 
 tens of thousands of spatial locations and tens of thousands of genes. 
@@ -206,20 +160,63 @@ within a minute to finish the deconvolution.
 
 ```{r}
 set.seed(seed = 20200107)
-CARD_obj <- CARD_deconvolution(CARD_object = CARD_obj)
+CARD_obj <- CARD_deconvolution(
+    sc_count = sc_count,
+    sc_meta = sc_meta,
+    spatial_count = spatial_count,
+    spatial_location = spatial_location,
+    ct_varname = "cellType",
+    ct_select = unique(sc_meta$cellType),
+    sample_varname = "sampleInfo",
+    mincountgene = 100,
+    mincountspot = 5 )
+## QC on scRNASeq dataset! ...
+## QC on spatially-resolved dataset! ..
 ## create reference matrix from scRNASeq...
 ## Select Informative Genes! ...
 ## Deconvolution Starts! ...
 ## Deconvolution Finish! ...
 ```
 
-The results are stored in `CARD_obj@Proportion_CARD`.
+And `CARDspa` also supports using SingleCellExperiment object and 
+SingleCellExperiment object, you can run the following code:
 
 ```{r}
-print(slot(CARD_obj, "Proportion_CARD")[1:2, ])
+## create sce object
+sce <- SingleCellExperiment(assay = list(counts = sc_count),
+                            colData = sc_meta)
+## create spe object
+spe <- SpatialExperiment(assay = list(counts = spatial_count),
+                        spatialCoords  = as.matrix(spatial_location)
+                        )
+celltypes <- unique(sc_meta$cellType)
+    
+set.seed(seed = 20200107)
+CARD_obj <- CARD_deconvolution(
+    spe = spe,
+    sce = sce,
+    sc_count = NULL,
+    sc_meta = NULL,
+    spatial_count = NULL,
+    spatial_location = NULL,
+    ct_varname = "cellType",
+    ct_select = celltypes,
+    sample_varname = "sampleInfo",
+    mincountgene = 100,
+    mincountspot = 5
+)
 ```
 
-### 3. Visualize the proportion for each cell type
+The spatial data are stored in `assays(CARD_obj)$spatial_countMat` and 
+`spatialCoords(CARD_obj)` while the scRNA-seq data is stored in 
+`CARD_obj@metadata$sc_eset` in the format of SingleCellExperiment. 
+The results are stored in `CARD_obj$Proportion_CARD`.
+
+```{r}
+print(CARD_obj$Proportion_CARD[1:2, ])
+```
+
+### 2. Visualize the proportion for each cell type
 First, we jointly visualize the cell type proportion matrix through scatterpie 
 plot.Note that here because the number of spots is relatively small, so jointly 
 visualize the cell type proportion matrix in the scatterpie plot format is 
@@ -238,8 +235,8 @@ colors <- c(
     "#E6AB02", "#A6761D"
 )
 p1 <- CARD_visualize_pie(
-    proportion = slot(CARD_obj, "Proportion_CARD"),
-    spatial_location = slot(CARD_obj, "spatial_location"),
+    proportion = CARD_obj$Proportion_CARD,
+    spatial_location = spatialCoords(CARD_obj),
     colors = colors,
     radius = 0.52
 ) ### You can choose radius = NULL or your own radius number
@@ -260,10 +257,10 @@ ct.visualize <- c(
 )
 ## visualize the spatial distribution of the cell type proportion
 p2 <- CARD_visualize_prop(
-    proportion = slot(CARD_obj, "Proportion_CARD"),
-    spatial_location = slot(CARD_obj, "spatial_location"),
+    proportion = CARD_obj$Proportion_CARD,
+    spatial_location = spatialCoords(CARD_obj),
     ### selected cell types to visualize
-    ct.visualize = ct.visualize,
+    ct_visualize = ct.visualize,
     ### if not provide, we will use the default colors
     colors = c("lightblue", "lightyellow", "red"),
     ### number of columns in the figure panel
@@ -274,7 +271,7 @@ p2 <- CARD_visualize_prop(
 print(p2)
 ```
 
-### 4. Visualize the proportion for two cell types
+### 3. Visualize the proportion for two cell types
 We added a new visualization function to visualize the distribution of two cell 
 types on the same post.  
 
@@ -282,11 +279,11 @@ types on the same post.
 ## visualize the spatial distribution of two cell types on the same plot
 p3 <- CARD_visualize_prop_2CT(
     ### Cell type proportion estimated by CARD
-    proportion = slot(CARD_obj, "Proportion_CARD"),
+    proportion = CARD_obj$Proportion_CARD,
     ### spatial location information
-    spatial_location = slot(CARD_obj, "spatial_location"),
+    spatial_location = spatialCoords(CARD_obj),
     ### two cell types you want to visualize
-    ct2.visualize = c("Cancer_clone_A", "Cancer_clone_B"),
+    ct2_visualize = c("Cancer_clone_A", "Cancer_clone_B"),
     ### two color scales
     colors = list(
         c("lightblue", "lightyellow", "red"),
@@ -299,7 +296,7 @@ print(p3)
 ### 5. Visualize the cell type proportion correlation 
 ```{r}
 # if not provide, we will use the default colors
-p4 <- CARD_visualize_Cor(slot(CARD_obj, "Proportion_CARD"), colors = NULL)
+p4 <- CARD_visualize_Cor(CARD_obj$Proportion_CARD, colors = NULL)
 print(p4)
 ```
 
@@ -315,8 +312,9 @@ resolution much higher than that measured in the original study.
 Specifically, CARD constructed a refined spatial map through the 
 function `CARD_imputation`. The essential inputs are:
 
-- CARD_object: CARD Object with estimated cell type compositions on 
-the original spatial resolved transcriptomics data.
+- CARD_object: SpatialExperiment Object created by CARD_deconvolution with 
+estimated cell type compositions on the original spatial resolved 
+transcriptomics data.
 - NumGrids: Initial number of newly grided spatial locations. The final number 
 of newly grided spatial locations will be lower than this value since the newly 
 grided locations outside the shape of the tissue will be filtered. 
@@ -334,15 +332,15 @@ affect the detection of the shape.
 ```{r}
 CARD_obj <- CARD_imputation(
     CARD_obj, 
-    NumGrids = 2000, 
+    num_grids = 2000, 
     ineibor = 10, 
     exclude = NULL)
 ## The rownames of locations are matched ...
 ## Make grids on new spatial locations ...
 ```
 
-The results are store in `CARD_obj@refined_prop` and 
-`CARD_obj@refined_expression`
+The results are store in `CARD_obj$refined_prop` and 
+`assays(CARD_obj)$refined_expression`
 
 ```{r}
 ## Visualize the newly grided spatial locations to see if the shape is correctly
@@ -350,13 +348,13 @@ The results are store in `CARD_obj@refined_prop` and
 ## location data into the CARD_imputation function
 location_imputation <- cbind.data.frame(
     x = as.numeric(sapply(
-        strsplit(rownames(slot(CARD_obj, "refined_prop")), split = "x"), "[", 1
+        strsplit(rownames(CARD_obj$refined_prop), split = "x"), "[", 1
     )),
     y = as.numeric(sapply(
-        strsplit(rownames(slot(CARD_obj, "refined_prop")), split = "x"), "[", 2
+        strsplit(rownames(CARD_obj$refined_prop), split = "x"), "[", 2
     ))
 )
-rownames(location_imputation) <- rownames(slot(CARD_obj, "refined_prop"))
+rownames(location_imputation) <- rownames(CARD_obj$refined_prop)
 library(ggplot2)
 p5 <- ggplot(
     location_imputation,
@@ -383,9 +381,9 @@ grided spatial locations.
 
 ```{r}
 p6 <- CARD_visualize_prop(
-    proportion = slot(CARD_obj, "refined_prop"),
+    proportion = CARD_obj$refined_prop,
     spatial_location = location_imputation,
-    ct.visualize = ct.visualize,
+    ct_visualize = ct.visualize,
     colors = c("lightblue", "lightyellow", "red"),
     NumCols = 4
 )
@@ -400,9 +398,9 @@ resolution.
 
 ```{r}
 p7 <- CARD_visualize_gene(
-    spatial_expression = slot(CARD_obj, "refined_expression"),
+    spatial_expression = assays(CARD_obj)$refined_expression,
     spatial_location = location_imputation,
-    gene.visualize = c("A4GNT", "AAMDC", "CD248"),
+    gene_visualize = c("A4GNT", "AAMDC", "CD248"),
     colors = NULL,
     NumCols = 6
 )
@@ -415,9 +413,9 @@ measured in the original study.
 
 ```{r}
 p8 <- CARD_visualize_gene(
-    spatial_expression = slot(CARD_obj, "spatial_countMat"),
-    spatial_location = slot(CARD_obj, "spatial_location"),
-    gene.visualize = c("A4GNT", "AAMDC", "CD248"),
+    spatial_expression = metadata(CARD_obj)$spatial_countMat,
+    spatial_location = metadata(CARD_obj)$spatial_location,
+    gene_visualize = c("A4GNT", "AAMDC", "CD248"),
     colors = NULL,
     NumCols = 6
 )
@@ -440,55 +438,54 @@ the tutorial is included.
 Similar to CARD, we will first need to create a CARDfree object with 
 the spatial transcriptomics dataset and the marker gene list 
 
-### 1. Create an `CARDfree` object
-The CARDfree object is created by the function `createCARDfreeObject`. Briefly, 
-the essential inputs are the same as the function `createCARDObject`, except 
+
+### 1. Deconvolution using CARDfree
+We can use `CARD_refFree` to do reference-free deconvolution. This function 
+frist creat a CARDfree object and then do deconvolution. Briefly, 
+the essential inputs are the same as the function `CARD_deconvolution`, except 
 that this function does not require the single cell count and meta information 
 matrix. Instead, it requires a markerList. 
 
 ```{r}
+## deconvolution using CARDfree
 data(markerList)
-CARDfree_obj <- createCARDfreeObject(
-    markerList = markerList,
+set.seed(seed = 20200107)
+CARDfree_obj <- CARD_refFree(
+    markerlist = markerList,
     spatial_count = spatial_count,
     spatial_location = spatial_location,
-    minCountGene = 100,
-    minCountSpot = 5
+    mincountgene = 100,
+    mincountspot = 5
 )
 ```
 
 Similarly, you can use SpatialExperiment object.
 
 ```{r}
-CARDfree_obj <- createCARDfreeObject(
-    markerList = markerList,
+data(markerList)
+set.seed(seed = 20200107)
+CARDfree_obj <- CARD_refFree(
+    markerlist = markerList,
     spatial_count = NULL,
     spatial_location = NULL,
     spe = spe,
-    minCountGene = 100,
-    minCountSpot = 5
+    mincountgene = 100,
+    mincountspot = 5
 )
 ```
 
-The spatial data are stored in `CARDfree_obj@spatial_countMat` 
-and `CARDfree_obj@spatial_location` while the marker list is stored in 
-CARDfree_objj@markerList in the format of list. 
 
-### 2. Deconvolution using CARDfree
-```{r}
-## deconvolution using CARDfree
-set.seed(seed = 20200107)
-CARDfree_obj <- CARD_refFree(CARDfree_obj)
-```
-
-The results are stored in `CARDfree_obj@Proportion_CARD`. 
+The spatial data are stored in `assays(CARDfree_obj)$spatial_countMat` 
+and `spatialCoords(CARDfree_obj)` while the marker list is stored in 
+`CARDfree_obj@metadata$markerList` in the format of list. 
+The results are stored in `CARDfree_obj$Proportion_CARD`. 
 
 ```{r}
 ## One limitation of reference-free version of CARD is that the cell
 ## types inferred
 ## from CARDfree do not come with a cell type label. It might be difficult to
 ## interpret the results.
-print(slot(CARD_obj, "Proportion_CARD")[1:2, ])
+print(CARDfree_obj$Proportion_CARD[1:2, ])
 ```
 
 ### 3. Visualization of the results of CARDfree
@@ -507,15 +504,15 @@ colors <- c(
 )
 ### In order to maximumply match with the original results of CARD, we order the
 ### colors to generally match with the results infered by CARD
-current_data <- slot(CARDfree_obj, "Proportion_CARD")
+current_data <- CARDfree_obj$Proportion_CARD
 new_order <- current_data[, c(
     8, 10, 14, 2, 1, 6, 12, 18, 7, 13, 20, 19, 16,
     17, 11, 15, 4, 9, 3, 5
 )]
-slot(CARDfree_obj, "Proportion_CARD") <- new_order
-colnames(slot(CARDfree_obj, "Proportion_CARD")) <- paste0("CT", 1:20)
-p9 <- CARD_visualize_pie(slot(CARDfree_obj, "Proportion_CARD"),
-    slot(CARDfree_obj, "spatial_location"),
+CARDfree_obj$Proportion_CARD <- new_order
+colnames(CARDfree_obj$Proportion_CARD) <- paste0("CT", 1:20)
+p9 <- CARD_visualize_pie(CARDfree_obj$Proportion_CARD,
+    spatialCoords(CARDfree_obj),
     colors = colors
 )
 print(p9)
@@ -544,7 +541,7 @@ the procedure.
 #### Note that here the shapeSpot is the user defined variable which
 #### indicates the capturing area of single cells. Details see above.
 set.seed(seed = 20210107)
-scMapping <- CARD_SCMapping(CARD_obj, shapeSpot = "Square", numCell = 20, 
+scMapping <- CARD_scmapping(CARD_obj, shapeSpot = "Square", numcell = 20, 
                             ncore = 2)
 print(scMapping)
 ### spatial location info and expression count of the single cell resolution
@@ -577,7 +574,10 @@ p10 <- ggplot(df, aes(x = x, y = y, colour = CT)) +
         panel.background = element_rect(colour = "white", fill = "white"),
         plot.background = element_rect(colour = "white", fill = "white"),
         legend.position = "bottom",
-        panel.border = element_rect(colour = "grey89", fill = NA, size = 0.5),
+        panel.border = element_rect(
+            colour = "grey89", 
+            fill = NA, 
+            linewidth = 0.5),
         axis.text = element_blank(),
         axis.ticks = element_blank(),
         axis.title = element_blank(),

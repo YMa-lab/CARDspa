@@ -5,18 +5,18 @@
 \title{Calculate the variance covariance matrix used in the imputation of the
 new grided locations}
 \usage{
-Sigma(locationOrig, trainInd, testInd, OptimalPhi, ineibor)
+Sigma(location_orig, train_ind, test_ind, optimal_phi, ineibor)
 }
 \arguments{
-\item{locationOrig}{Data frame, spatial location data frame of the original
+\item{location_orig}{Data frame, spatial location data frame of the original
 spatial resolved transcriptomics dataset, stored in the
-CARD_object@spatial_location}
+spatialCoords(CARD_object)}
 
-\item{trainInd}{Vector, index of the original spatial locations}
+\item{train_ind}{Vector, index of the original spatial locations}
 
-\item{testInd}{Vector, index of the newly grided spatial locations}
+\item{test_ind}{Vector, index of the newly grided spatial locations}
 
-\item{OptimalPhi}{Numeric, the optimal phi value stored in CARD_object}
+\item{optimal_phi}{Numeric, the optimal phi value stored in CARD_object}
 
 \item{ineibor}{Numeric, number of neighbors used in the imputation on newly
 grided spatial locations, default is 10.}

@@ -3,7 +3,7 @@
 #' @param proportion Data frame, cell type proportion estimated by CARD in
 #' either original resolution or enhanced resolution.
 #' @param spatial_location Data frame, spatial location information.
-#' @param ct.visualize Vector of selected cell type names that are
+#' @param ct_visualize Vector of selected cell type names that are
 #' interested to visualize
 #' @param colors Vector of color names that you want to use, if NULL, we will
 #' use the default color scale c("lightblue","lightyellow","red")
@@ -17,31 +17,31 @@
 #' @export
 #' @examples
 #' library(ggplot2)
+#' library(SpatialExperiment)
 #' data(spatial_count)
 #' data(spatial_location)
 #' data(sc_count)
 #' data(sc_meta)
-#' CARD_obj <- createCARDObject(
+#' CARD_obj <- CARD_deconvolution(
 #'     sc_count = sc_count,
 #'     sc_meta = sc_meta,
 #'     spatial_count = spatial_count,
 #'     spatial_location = spatial_location,
-#'     ct.varname = "cellType",
-#'     ct.select = unique(sc_meta$cellType),
-#'     sample.varname = "sampleInfo",
-#'     minCountGene = 100,
-#'     minCountSpot = 5
+#'     ct_varname = "cellType",
+#'     ct_select = unique(sc_meta$cellType),
+#'     sample_varname = "sampleInfo",
+#'     mincountgene = 100,
+#'     mincountspot = 5
 #' )
-#' CARD_obj <- CARD_deconvolution(CARD_object = CARD_obj)
-#' ct.visualize <- c(
+#' ct_visualize <- c(
 #'     "Acinar_cells", "Cancer_clone_A", "Cancer_clone_B",
 #'     "Ductal_terminal_ductal_like", "Ductal_CRISP3_high-centroacinar_like",
 #'     "Ductal_MHC_Class_II", "Ductal_APOL1_high-hypoxic", "Fibroblasts"
 #' )
 #' CARD_visualize_prop(
-#'     proportion = slot(CARD_obj, "Proportion_CARD"),
-#'     spatial_location = slot(CARD_obj, "spatial_location"),
-#'     ct.visualize = ct.visualize,
+#'     proportion = CARD_obj$Proportion_CARD,
+#'     spatial_location = spatialCoords(CARD_obj),
+#'     ct_visualize = ct_visualize,
 #'     colors = c("lightblue", "lightyellow", "red"),
 #'     NumCols = 4,
 #'     pointSize = 3.0
@@ -50,9 +50,11 @@
 CARD_visualize_prop <- function(
         proportion, 
         spatial_location,
-        ct.visualize = ct.visualize,
+        ct_visualize = ct_visualize,
         colors = c("lightblue", "lightyellow", "red"),
-        NumCols, pointSize = 3.0) {
+        NumCols, 
+        pointSize = 3.0) {
+    #####Preapare dataframe for plotting
     if (is.null(colors)) {
         colors <- c("lightblue", "lightyellow", "red")
     } else {
@@ -65,38 +67,37 @@ CARD_visualize_prop <- function(
         stop("The rownames of proportion data does not match with the
             rownames of spatial location data")
     }
-    ct.select <- ct.visualize
-    res_CARD <- res_CARD[, ct.select]
+    ct_select <- ct_visualize
+    res_CARD <- res_CARD[, ct_select]
     if (!is.null(ncol(res_CARD))) {
         res_CARD_scale <- as.data.frame(apply(res_CARD, 2, function(x) {
-            (x - min(x)) / (max(x) - min(x))
-        }))
+            (x - min(x)) / (max(x) - min(x))}))
     } else {
         res_CARD_scale <-
             as.data.frame((res_CARD - min(res_CARD)) /
-                (max(res_CARD) - min(res_CARD)))
-        colnames(res_CARD_scale) <- ct.visualize
+                        (max(res_CARD) - min(res_CARD)))
+        colnames(res_CARD_scale) <- ct_visualize
     }
     res_CARD_scale$x <- as.numeric(location$x)
     res_CARD_scale$y <- as.numeric(location$y)
-    mData <- melt(res_CARD_scale, id.vars = c("x", "y"))
-    colnames(mData)[3] <- "Cell_Type"
+    mdata <- melt(res_CARD_scale, id.vars = c("x", "y"))
+    colnames(mdata)[3] <- "Cell_Type"
     b <- c(0, 1)
-    p <- suppressMessages(ggplot(mData, aes(x, y)) +
+    
+    #####Plot
+    p <- ggplot(mdata, aes(x, y)) +
         geom_point(aes(colour = value), size = pointSize) +
         scale_color_gradientn(colours = colors) +
-        # scale_color_viridis_c(option = 2)+
         scale_x_discrete(expand = c(0, 1)) +
         scale_y_discrete(expand = c(0, 1)) +
         facet_wrap(~Cell_Type, ncol = NumCols) +
         coord_fixed() +
         theme(
             plot.margin = margin(0.1, 0.1, 0.1, 0.1, "cm"),
-            # legend.position=c(0.14,0.76),
             panel.background = element_blank(),
             plot.background = element_blank(),
             panel.border = element_rect(colour = "grey89", fill = NA, 
-                                        size = 0.5),
+                                        linewidth = 0.5),
             axis.text = element_blank(),
             axis.ticks = element_blank(),
             axis.title = element_blank(),
@@ -105,7 +106,7 @@ CARD_visualize_prop <- function(
             strip.text = element_text(size = 12, face = "bold"),
             legend.key = element_rect(colour = "transparent", fill = "white"),
             legend.key.size = unit(0.45, "cm")
-        ))
+        )
     return(p)
 }
 
@@ -115,7 +116,7 @@ CARD_visualize_prop <- function(
 #' @param proportion Data frame, cell type proportion estimated by CARD in
 #' either original resolution or enhanced resolution.
 #' @param spatial_location Data frame, spatial location information.
-#' @param ct2.visualize Vector of selected two cell type names that are
+#' @param ct2_visualize Vector of selected two cell type names that are
 #' interested to visualize, here we only focus on two cell types
 #' @param colors list of color names that you want to use for each cell type,
 #' if NULL, we will use the default color scale list
@@ -128,26 +129,26 @@ CARD_visualize_prop <- function(
 #' @export
 #' @examples
 #' library(ggplot2)
+#' library(SpatialExperiment)
 #' data(spatial_count)
 #' data(spatial_location)
 #' data(sc_count)
 #' data(sc_meta)
-#' CARD_obj <- createCARDObject(
+#' CARD_obj <- CARD_deconvolution(
 #'     sc_count = sc_count,
 #'     sc_meta = sc_meta,
 #'     spatial_count = spatial_count,
 #'     spatial_location = spatial_location,
-#'     ct.varname = "cellType",
-#'     ct.select = unique(sc_meta$cellType),
-#'     sample.varname = "sampleInfo",
-#'     minCountGene = 100,
-#'     minCountSpot = 5
+#'     ct_varname = "cellType",
+#'     ct_select = unique(sc_meta$cellType),
+#'     sample_varname = "sampleInfo",
+#'     mincountgene = 100,
+#'     mincountspot = 5
 #' )
-#' CARD_obj <- CARD_deconvolution(CARD_object = CARD_obj)
 #' CARD_visualize_prop_2CT(
-#'     proportion = slot(CARD_obj, "Proportion_CARD"),
-#'     spatial_location = slot(CARD_obj, "spatial_location"),
-#'     ct2.visualize = c("Cancer_clone_A", "Cancer_clone_B"),
+#'     proportion = CARD_obj$Proportion_CARD,
+#'     spatial_location = spatialCoords(CARD_obj),
+#'     ct2_visualize = c("Cancer_clone_A", "Cancer_clone_B"),
 #'     colors = list(c("lightblue", "lightyellow", "red"), c(
 #'         "lightblue", "lightyellow",
 #'         "black"
@@ -157,8 +158,9 @@ CARD_visualize_prop <- function(
 CARD_visualize_prop_2CT <- function(
         proportion, 
         spatial_location,
-        ct2.visualize = ct2.visualize,
+        ct2_visualize = ct2_visualize,
         colors = NULL) {
+    #####Preapare dataframe for plotting
     if (is.null(colors)) {
         colors <- list(
             c("lightblue", "lightyellow", "red"),
@@ -174,46 +176,45 @@ CARD_visualize_prop_2CT <- function(
         stop("The rownames of proportion data does not match with the
             rownames of spatial location data")
     }
-    ct.select <- ct2.visualize
-    res_CARD <- res_CARD[, ct.select]
+    ct_select <- ct2_visualize
+    res_CARD <- res_CARD[, ct_select]
     res_CARD_scale <- as.data.frame(apply(res_CARD, 2, function(x) {
         (x - min(x)) / (max(x) - min(x))
     }))
     res_CARD_scale$x <- as.numeric(location$x)
     res_CARD_scale$y <- as.numeric(location$y)
-    mData <- melt(res_CARD_scale, id.vars = c("x", "y"))
-    colnames(mData)[3] <- "Cell_Type"
+    mdata <- melt(res_CARD_scale, id.vars = c("x", "y"))
+    colnames(mdata)[3] <- "Cell_Type"
     b <- c(0, 1)
-    p <- suppressMessages(ggplot() +
+    
+    #####Plot
+    p <- ggplot() +
         geom_point(
-            data = mData[mData$Cell_Type == ct2.visualize[1], ],
-            aes(
-                x = x,
-                y = y,
-                color = value
-            ), shape = 21, size = 5
+            data = mdata[mdata$Cell_Type == ct2_visualize[1], ],
+            aes(x = x,y = y,color = value), 
+            shape = 21, 
+            size = 5
         ) +
         scale_color_gradientn(colours = colors[[1]]) +
         geom_point(
-            data = mData[mData$Cell_Type == ct2.visualize[2], ],
-            aes(
-                x = x,
-                y = y,
-                fill = value
-            ), color = "white", shape = 22, size = 2
+            data = mdata[mdata$Cell_Type == ct2_visualize[2], ],
+            aes(x = x,y = y,fill = value), 
+            color = "white", 
+            shape = 22, 
+            size = 2
         ) +
         scale_fill_gradientn(colours = colors[[2]]) +
-        # scale_color_viridis_c(option = 2)+
         scale_x_discrete(expand = c(0, 1)) +
         scale_y_discrete(expand = c(0, 1)) +
         coord_fixed() +
         theme(
             plot.margin = margin(0.1, 0.1, 0.1, 0.1, "cm"),
-            # legend.position=c(0.14,0.76),
             panel.background = element_blank(),
             plot.background = element_blank(),
-            panel.border = element_rect(colour = "grey89", fill = NA, 
-                                        size = 0.5),
+            panel.border = element_rect(
+                colour = "grey89", 
+                fill = NA, 
+                linewidth = 0.5),
             axis.text = element_blank(),
             axis.ticks = element_blank(),
             axis.title = element_blank(),
@@ -222,7 +223,7 @@ CARD_visualize_prop_2CT <- function(
             strip.text = element_text(size = 12, face = "bold"),
             legend.key.size = unit(0.45, "cm")
         ) +
-        labs(colour = ct2.visualize[1], fill = ct2.visualize[2]))
+        labs(colour = ct2_visualize[1], fill = ct2_visualize[2])
     return(p)
 }
 
@@ -247,22 +248,22 @@ CARD_visualize_prop_2CT <- function(
 #' @export
 #' @examples
 #' library(ggplot2)
+#' library(SpatialExperiment)
 #' data(spatial_count)
 #' data(spatial_location)
 #' data(sc_count)
 #' data(sc_meta)
-#' CARD_obj <- createCARDObject(
+#' CARD_obj <- CARD_deconvolution(
 #'     sc_count = sc_count,
 #'     sc_meta = sc_meta,
 #'     spatial_count = spatial_count,
 #'     spatial_location = spatial_location,
-#'     ct.varname = "cellType",
-#'     ct.select = unique(sc_meta$cellType),
-#'     sample.varname = "sampleInfo",
-#'     minCountGene = 100,
-#'     minCountSpot = 5
+#'     ct_varname = "cellType",
+#'     ct_select = unique(sc_meta$cellType),
+#'     sample_varname = "sampleInfo",
+#'     mincountgene = 100,
+#'     mincountspot = 5
 #' )
-#' CARD_obj <- CARD_deconvolution(CARD_object = CARD_obj)
 #' colors <- c(
 #'     "#FFD92F", "#4DAF4A", "#FCCDE5", "#D9D9D9", "#377EB8", "#7FC97F",
 #'     "#BEAED4", "#FDC086", "#FFFF99", "#386CB0", "#F0027F", "#BF5B17", 
@@ -270,8 +271,8 @@ CARD_visualize_prop_2CT <- function(
 #'     "#E6AB02", "#A6761D"
 #' )
 #' CARD_visualize_pie(
-#'     proportion = slot(CARD_obj, "Proportion_CARD"),
-#'     spatial_location = slot(CARD_obj, "spatial_location"),
+#'     proportion = CARD_obj$Proportion_CARD,
+#'     spatial_location = spatialCoords(CARD_obj),
 #'     colors = colors,
 #'     radius = 0.52
 #' )
@@ -280,6 +281,7 @@ CARD_visualize_pie <- function(
         spatial_location, 
         colors = NULL,
         radius = NULL) {
+    #####Preapare dataframe for plotting
     res_CARD <- as.data.frame(proportion)
     res_CARD <- res_CARD[, mixedsort(colnames(res_CARD))]
     location <- as.data.frame(spatial_location)
@@ -303,16 +305,9 @@ CARD_visualize_pie <- function(
         "#f1faee", "#f08080"
     )
     if (is.null(colors)) {
-        # colors = brewer.pal(11, "Spectral")
         if (ncol(res_CARD) > length(colorCandidate)) {
             colors <- colorRampPalette(colorCandidate)(ncol(res_CARD))
         } else {
-            # if (is.null(seed)) {
-            #     iseed <- 12345
-            # } else {
-            #     iseed <- seed
-            # }
-            # set.seed(iseed)
             colors <-
                 colorCandidate[sample(
                     seq_len(length(colorCandidate)),
@@ -323,7 +318,7 @@ CARD_visualize_pie <- function(
         colors <- colors
     }
     data <- cbind(res_CARD, location)
-    ct.select <- colnames(res_CARD)
+    ct_select <- colnames(res_CARD)
     if (is.null(radius)) {
         radius <- (max(data$x) - min(data$x)) * (max(data$y) - min(data$y))
         radius <- radius / nrow(data)
@@ -334,12 +329,14 @@ CARD_visualize_pie <- function(
         #### figure
         radius <- radius
     }
-    p <- suppressMessages(
+    
+    #####Plot
+    p <- 
         ggplot() +
             geom_scatterpie(
                 data = data,
                 aes(x = x, y = y, r = radius),
-                cols = ct.select,
+                cols = ct_select,
                 color = NA
             ) +
             coord_fixed(ratio = 1 * max(data$x) / max(data$y)) +
@@ -348,21 +345,24 @@ CARD_visualize_pie <- function(
                 plot.margin = margin(0.1, 0.1, 0.1, 0.1, "cm"),
                 panel.background = element_blank(),
                 plot.background = element_blank(),
-                panel.border = element_rect(colour = "grey89", fill = NA, 
-                                            size = 0.5),
+                panel.border = element_rect(
+                    colour = "grey89", 
+                    fill = NA, 
+                    linewidth = 0.5),
                 axis.text = element_blank(),
                 axis.ticks = element_blank(),
                 axis.title = element_blank(),
                 legend.title = element_text(size = 16, face = "bold"),
                 legend.text = element_text(size = 15),
-                legend.key = element_rect(colour = "transparent", 
-                                        fill = "white"),
+                legend.key = element_rect(
+                    colour = "transparent", 
+                    fill = "white"),
                 legend.key.size = unit(0.45, "cm"),
                 strip.text = element_text(size = 16, face = "bold"),
                 legend.position = "bottom"
             ) +
             guides(fill = guide_legend(title = "Cell Type"))
-    )
+    
     return(p)
 }
 
@@ -384,20 +384,20 @@ CARD_visualize_pie <- function(
 #' data(spatial_location)
 #' data(sc_count)
 #' data(sc_meta)
-#' CARD_obj <- createCARDObject(
+#' CARD_obj <- CARD_deconvolution(
 #'     sc_count = sc_count,
 #'     sc_meta = sc_meta,
 #'     spatial_count = spatial_count,
 #'     spatial_location = spatial_location,
-#'     ct.varname = "cellType",
-#'     ct.select = unique(sc_meta$cellType),
-#'     sample.varname = "sampleInfo",
-#'     minCountGene = 100,
-#'     minCountSpot = 5
+#'     ct_varname = "cellType",
+#'     ct_select = unique(sc_meta$cellType),
+#'     sample_varname = "sampleInfo",
+#'     mincountgene = 100,
+#'     mincountspot = 5
 #' )
-#' CARD_obj <- CARD_deconvolution(CARD_object = CARD_obj)
-#' CARD_visualize_Cor(slot(CARD_obj, "Proportion_CARD"), colors = NULL)
+#' CARD_visualize_Cor(CARD_obj$Proportion_CARD, colors = NULL)
 CARD_visualize_Cor <- function(proportion, colors = colors) {
+    #####Preapare dataframe for plotting
     proportion <- proportion[, order(colnames(proportion))]
     cor_CARD <- cor(as.matrix(proportion))
     if (is.null(colors)) {
@@ -405,8 +405,10 @@ CARD_visualize_Cor <- function(proportion, colors = colors) {
     } else {
         colors <- colors
     }
-
-    p <- suppressMessages(ggcorrplot(cor_CARD,
+    
+    #####Plot
+    p <- ggcorrplot(
+        cor_CARD,
         hc.order = FALSE,
         outline.color = "white",
         tl.srt = 60,
@@ -418,20 +420,23 @@ CARD_visualize_Cor <- function(proportion, colors = colors) {
             plot.margin = margin(0.1, 0.1, 0.1, 0.1, "cm"),
             panel.background = element_blank(),
             plot.background = element_blank(),
-            panel.border = element_rect(colour = "grey89", fill = NA, 
-                                        size = 0.5),
+            panel.border = element_rect(
+                colour = "grey89", 
+                fill = NA, 
+                linewidth = 0.5),
             axis.text = element_text(size = 12),
             axis.ticks = element_blank(),
             axis.title = element_blank(),
             legend.title = element_text(size = 16, face = "bold"),
             legend.text = element_text(size = 16),
-            legend.key = element_rect(colour = "transparent", 
-                                    fill = "white"),
+            legend.key = element_rect(
+                colour = "transparent", 
+                fill = "white"),
             legend.key.size = unit(0.45, "cm")
         ) +
         coord_fixed() +
         ggtitle("Correlation") +
-        theme(plot.title = element_text(size = 22, face = "bold")))
+        theme(plot.title = element_text(size = 22, face = "bold"))
     return(p)
 }
 
@@ -440,7 +445,7 @@ CARD_visualize_Cor <- function(proportion, colors = colors) {
 #' @param spatial_expression Data frame, spatial gene expression in either
 #' original resolution or enhanced resolution.
 #' @param spatial_location Data frame, spatial location information.
-#' @param gene.visualize Vector of selected gene names that are interested to
+#' @param gene_visualize Vector of selected gene names that are interested to
 #' visualize
 #' @param colors Vector of color names that you want to use, if NULL, we will
 #' use the default color scale in virdis palette
@@ -453,36 +458,38 @@ CARD_visualize_Cor <- function(proportion, colors = colors) {
 #' @export
 #' @examples
 #' library(ggplot2)
+#' library(SummarizedExperiment)
+#' library(SpatialExperiment)
 #' data(spatial_count)
 #' data(spatial_location)
 #' data(sc_count)
 #' data(sc_meta)
-#' CARD_obj <- createCARDObject(
+#' CARD_obj <- CARD_deconvolution(
 #'     sc_count = sc_count,
 #'     sc_meta = sc_meta,
 #'     spatial_count = spatial_count,
 #'     spatial_location = spatial_location,
-#'     ct.varname = "cellType",
-#'     ct.select = unique(sc_meta$cellType),
-#'     sample.varname = "sampleInfo",
-#'     minCountGene = 100,
-#'     minCountSpot = 5
+#'     ct_varname = "cellType",
+#'     ct_select = unique(sc_meta$cellType),
+#'     sample_varname = "sampleInfo",
+#'     mincountgene = 100,
+#'     mincountspot = 5
 #' )
-#' CARD_obj <- CARD_deconvolution(CARD_object = CARD_obj)
 #' CARD_visualize_gene(
-#'     spatial_expression = slot(CARD_obj, "spatial_countMat"),
-#'     spatial_location = slot(CARD_obj, "spatial_location"),
-#'     gene.visualize = c("A4GNT", "AAMDC", "CD248"),
+#'     spatial_expression = assays(CARD_obj)$spatial_countMat,
+#'     spatial_location = spatialCoords(CARD_obj),
+#'     gene_visualize = c("A4GNT", "AAMDC", "CD248"),
 #'     colors = NULL,
-#'     NumCols = 6
+#'     NumCols = 3
 #' )
 #'
 CARD_visualize_gene <- function(
         spatial_expression, 
         spatial_location,
-        gene.visualize, 
+        gene_visualize, 
         colors = colors, 
         NumCols) {
+    #####Preapare dataframe for plotting
     expression <- as.data.frame(as.matrix(spatial_expression))
     expression <- sweep(expression, 2, colSums(expression), "/")
     location <- as.data.frame(spatial_location)
@@ -490,16 +497,16 @@ CARD_visualize_gene <- function(
         stop("The colnames of expression data does not match with the rownames
         of spatial location data")
     }
-    gene.select <- gene.visualize
-    if (sum(toupper(gene.select) %in% toupper(rownames(spatial_expression))) !=
-        length(gene.select)) {
+    gene_select <- gene_visualize
+    if (sum(toupper(gene_select) %in% toupper(rownames(spatial_expression))) !=
+        length(gene_select)) {
         stop("There existing selected genes that are not in the 
             expression data!")
     }
-    Data <- NULL
-    for (i in seq_len(length(gene.select))) {
+    plotdata <- NULL
+    for (i in seq_len(length(gene_select))) {
         #### load spatial dataset
-        gene <- gene.select[i]
+        gene <- gene_select[i]
         ind <- which(toupper(rownames(expression)) == toupper(gene))
         df <- as.numeric(expression[ind, ])
         names(df) <- colnames(expression)
@@ -510,11 +517,14 @@ CARD_visualize_gene <- function(
             y = as.numeric(location$y)
         )
         d$gene <- gene
-        Data <- rbind(Data, d)
+        plotdata <- rbind(plotdata, d)
     }
-    Data$gene <- factor(Data$gene, levels = gene.select)
-    p <- suppressMessages(ggplot(Data, aes(x, y)) +
-        geom_point(aes(color = value),
+    plotdata$gene <- factor(plotdata$gene, levels = gene_select)
+    
+    ##### Plot
+    p <- ggplot(plotdata, aes(x, y)) +
+        geom_point(
+            aes(color = value),
             size = 1.5,
             shape = 15,
             position = position_dodge2(width = 0.05)
@@ -528,8 +538,10 @@ CARD_visualize_gene <- function(
             legend.position = "bottom",
             panel.background = element_blank(),
             plot.background = element_blank(),
-            panel.border = element_rect(colour = "grey89", fill = NA, 
-                                        size = 0.5),
+            panel.border = element_rect(
+                colour = "grey89", 
+                fill = NA, 
+                linewidth = 0.5),
             axis.text = element_blank(),
             axis.ticks = element_blank(),
             axis.title = element_blank(),
@@ -539,10 +551,10 @@ CARD_visualize_gene <- function(
             legend.key = element_rect(colour = "transparent", fill = "white"),
             legend.key.size = unit(1.0, "cm")
         ) +
-        guides(color = guide_colourbar(title = "Expression")))
+        guides(color = guide_colourbar(title = "Expression"))
     if (is.null(colors)) {
-        p <- p + scale_color_viridis_c(labels = c("0", "0.25", "0.5", "0.75", 
-                                                "1.0"))
+        p <- p + scale_color_viridis_c(
+            labels = c("0", "0.25", "0.5", "0.75", "1.0"))
     } else {
         p <- p + scale_color_gradientn(colours = colors)
     }
