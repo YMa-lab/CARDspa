@@ -50,11 +50,11 @@ data(markerList)
 data(spatial_count)
 data(spatial_location)
 CARDfree_obj <- CARD_refFree(
-    markerlist = markerList,
-    spatial_count = spatial_count[1:7500, ],
-    spatial_location = spatial_location,
-    mincountgene = 100,
-    mincountspot = 5
+markerlist = markerList[8:16],
+spatial_count = spatial_count[1:2500, ],
+spatial_location = spatial_location,
+mincountgene = 100,
+mincountspot = 5
 )
 
 }
