@@ -1,18 +1,30 @@
 # CARDspa
 
 ## Spatially Informed Cell Type Deconvolution for Spatial Transcriptomics 
-We developed a statistical method for spatially informed cell type deconvolution 
-for spatial transcriptomics. Briefly,CARD is a reference-based 
-deconvolution method that estimates cell type composition in spatial 
-transcriptomics based on cell type specific expression information obtained 
-from a reference scRNA-seq data. A key feature of CARD is its ability to 
-accommodate spatial correlation in the cell type composition across tissue 
-locations, enabling accurate and spatially informed cell type deconvolution 
-as well as refined spatial map construction. CARD relies on an efficient 
-optimization algorithm for constrained maximum likelihood estimation and 
-is scalable to spatial transcriptomics with tens of thousands of spatial 
-locations and tens of thousands of genes. CARD is implemented as an 
-open-source R package, freely available at www.xzlab.org/software.html. 
+We developed CARDspa, a Bioconductor version of the original CARD method 
+[https://github.com/YMa-lab/CARD], for spatially informed cell type 
+deconvolution in spatial transcriptomics. CARDspa is a reference-based 
+deconvolution tool that estimates the cell type composition in spatial 
+transcriptomics data by utilizing cell-type-specific expression information 
+obtained from reference single-cell RNA sequencing (scRNA-seq) data.
+
+A key feature of CARDspa is its ability to accommodate spatial correlation in 
+the cell type composition across different tissue locations, which ensures 
+accurate and spatially informed deconvolution, as well as refined spatial map 
+construction. This is achieved through an efficient optimization algorithm for 
+constrained maximum likelihood estimation. CARDspa is scalable to handle spatial 
+transcriptomics data with tens of thousands of spatial locations and genes.
+
+As a Bioconductor package, CARDspa is designed to integrate seamlessly with 
+other Bioconductor tools for analyzing and visualizing high-dimensional 
+biological data. It leverages Bioconductor's robust framework for 
+reproducibility and ease of use within the R ecosystem.
+
+CARDspa is implemented as an open-source R package, and is freely available on 
+Bioconductor at [https://bioconductor.org/packages/CARDspa/].
+
+For further details, please visit our project page at 
+[www.xzlab.org/software.html]. 
 
 Installation
 ------------
