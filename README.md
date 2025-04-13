@@ -23,9 +23,6 @@ reproducibility and ease of use within the R ecosystem.
 CARDspa is implemented as an open-source R package, and is freely available on 
 Bioconductor at [https://bioconductor.org/packages/CARDspa/].
 
-For further details, please visit our project page at 
-[www.xzlab.org/software.html]. 
-
 Installation
 ------------
 You can install the released version of CARDspa using BioConductor.
